@@ -9,7 +9,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".game_running"
+            android:name=".Poop_Crush"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_game_running"
             android:theme="@style/FullscreenTheme">

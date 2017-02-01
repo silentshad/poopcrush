@@ -4,5 +4,11 @@ package briochetranchecompany.poopcrush;
  * Created by silentshad on 01/02/17.
  */
 
-public class simple_poop {
+public class board_view {
+
+    board_view()
+    {
+
+    }
+
 }
