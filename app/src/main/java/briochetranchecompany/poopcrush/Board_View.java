@@ -40,7 +40,7 @@ public class Board_View extends View{
 
 
         super.onDraw(canvas);
-        RelativeLayout game_layout = (RelativeLayout)  findViewById(R.id.game_layout);
+        View game_layout =   findViewById(R.id.board_view);
         float block_h = game_layout.getHeight() /  8.f; //board.height;
         float block_w = game_layout.getWidth() / 8.f; //board.width;
 
