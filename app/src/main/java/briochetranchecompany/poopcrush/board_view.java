@@ -6,9 +6,12 @@ package briochetranchecompany.poopcrush;
 
 public class board_view {
 
+    poop[][] grid;
+    
     board_view()
     {
 
     }
+
 
 }
