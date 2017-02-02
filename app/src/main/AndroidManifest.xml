@@ -10,6 +10,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".Poop_Crush"
+            android:label="PoopCrush"
             android:screenOrientation="portrait">
 
             <intent-filter>
