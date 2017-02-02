@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -20,6 +21,10 @@ public class Board_View extends View{
 
     Poop[][] grid;
     Board board;
+    int nb_touched_poop;
+    int was_touchedX;
+    int was_touchedY;
+
 
     private static final String TAG = "MyActivity";
     Bitmap poop_png;
@@ -29,6 +34,10 @@ public class Board_View extends View{
     {
 
         super(context, attrs);
+        nb_touched_poop =0;
+        was_touchedX =0;
+        was_touchedY = 0;
+
         poop_png = BitmapFactory.decodeResource(getResources(), R.drawable.beard) ;
         test = new Rect();
         /* A COMPLETER */
@@ -99,5 +108,44 @@ public class Board_View extends View{
         //MUST CALL THIS
         setMeasuredDimension(width, height);
 
+    }
+
+    public boolean onTouchEvent(MotionEvent event)
+    {
+        int x=(int)event.getX();
+        int y=(int)event.getY();
+
+        int poop_touchedX = x/ 8; // board.width;
+        int poop_touchedY = y/ 8; // board.height;
+
+        if (  /* board.isvalid(poop_touchedX, poop_touchedY)  && */nb_touched_poop < 2
+                                                    && event.getAction()==MotionEvent.ACTION_DOWN)
+        {
+            // a poop on the grid was touched and no poop was touched or only one
+            nb_touched_poop++;
+
+            if ( nb_touched_poop ==1)
+            {
+                was_touchedX = poop_touchedX;
+                was_touchedY = poop_touchedY;
+            }
+
+            else
+            {
+                if (/* not( board.swapping(was_touchedX,was_touchedY,poop_touchedX,poop_touchedY) )*/ true) {
+                    // swapping was not valid
+                    //therefore only the last click  count
+                    nb_touched_poop = 1;
+                    was_touchedX = poop_touchedX;
+                    was_touchedY = poop_touchedY;
+                } else {
+                    nb_touched_poop = 0;
+                    // swap happen so there i no selected poop
+                }
+            }
+                return true;
+        }
+
+        return false;
     }
 }
