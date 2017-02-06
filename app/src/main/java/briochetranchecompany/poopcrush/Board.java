@@ -2,9 +2,12 @@ package briochetranchecompany.poopcrush;
 
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Random;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by silentshad on 01/02/17.
@@ -18,6 +21,8 @@ public class Board
     Random rand; // generator of random int
     int width ;
     int height;
+    int thresh = 3;
+    int poop_count = 5;
 
     public Board()//int width, int height )
     {
@@ -33,7 +38,7 @@ public class Board
 
                 Poop poop = new Poop(Poop.TYPE.BASIC);
                 // give the skin
-                poop.skin = (rand.nextInt(4)) %4;
+                poop.skin = rand.nextInt(poop_count-1);
                 grid[i][j] = poop ;
 
             }
@@ -66,7 +71,62 @@ public class Board
 
     }
 
-    public ArrayList<Poop> get_neighbour(int x,int y)
+    public void get_neighbour(Poop poop, ArrayList<Poop> L) // add  unvisited neighbour to L
+    {
+        int x = poop.x;
+        int y = poop.y;
+
+        if(  isvalid(x-1,y) && !grid[x-1][y].visited && grid[x-1][y].skin == poop.skin   )
+            L.add(grid[x-1][y]);
+
+        if(  isvalid(x+1,y) && !grid[x+1][y].visited && grid[x+1][y].skin == poop.skin   )
+            L.add(grid[x+1][y]);
+
+        if(  isvalid(x,y-1) && !grid[x][y-1].visited && grid[x][y-1].skin == poop.skin   )
+            L.add(grid[x][y-1]);
+
+        if(  isvalid(x,y+1) && !grid[x][y+1].visited && grid[x][y+1].skin == poop.skin   )
+            L.add(grid[x][y+1]);
+
+    }
+
+    public boolean score_point(Poop poop) // return 0 if not enough poop are touching
+    {
+        ArrayList<Poop> neigh_list = new ArrayList<>();
+        get_neighbour( poop, neigh_list);
+        int same_skin = 1;
+
+        while( !neigh_list.isEmpty() )
+        {
+            int i=0;
+            Poop current = neigh_list.get(i);
+            get_neighbour(current, neigh_list);
+            current.visited = true;
+            same_skin++;
+
+            i++;
+        }
+        if (same_skin >= thresh)
+        {
+            Log.d(TAG, "score_point: above thresh ");
+            for (Poop p: neigh_list)
+            {
+                Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
+                temp_poop.skin = poop_count-1;
+                grid[p.x][p.y] = temp_poop;
+            }
+
+            return true;
+        }
+        else
+        {
+            for (Poop p: neigh_list)
+            {
+               grid[p.x][p.y].visited = false;
+            }
+            return false;
+        }
+    }
 
 }
 

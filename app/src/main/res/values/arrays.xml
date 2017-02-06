@@ -6,6 +6,7 @@
         <item>@drawable/happy</item>
         <item>@drawable/sad</item>
 
+        <item>@drawable/empty</item> <!-- must be last -->
     </string-array>
 
 

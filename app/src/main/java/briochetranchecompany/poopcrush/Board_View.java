@@ -50,7 +50,7 @@ public class Board_View extends View {
         Resources res = getResources();
         TypedArray poop_skin_xml =  res.obtainTypedArray(R.array.poop_skins);
         int count_skin = poop_skin_xml.length();
-        Log.d(TAG, " Board_View: \n\n" +poop_skin_xml+ "\n \n" + count_skin +" \n \n a");
+
 
         poop_skins = new Drawable[count_skin];
         for (int i = 0 ; i< count_skin; i++)
@@ -142,13 +142,13 @@ public class Board_View extends View {
         int poop_touchedX = x/ (view_space.width()/board.width)  ;
         int poop_touchedY = y/ (view_space.height()/board.height);
 
-        Log.d(TAG, "onTouchEvent: "+ poop_touchedX);
+
         if ( board.isvalid(poop_touchedX, poop_touchedY)  && nb_touched_poop < 2
                                                     && event.getAction()==MotionEvent.ACTION_DOWN)
         {
             // a poop on the grid was touched and no poop was touched or only one
             nb_touched_poop++;
-            Log.d(TAG, "onTouchEvent: \n\n\n "+nb_touched_poop);
+
 
             if ( nb_touched_poop ==1)
             {
@@ -165,6 +165,11 @@ public class Board_View extends View {
                     was_touchedX = poop_touchedX;
                     was_touchedY = poop_touchedY;
                 } else {
+                    Log.d(TAG, "swaping done");
+                    boolean debug = board.score_point(board.grid[was_touchedX][was_touchedY]);
+                    Log.d(TAG, "first score"+ debug);
+                    debug = board.score_point( board.grid[poop_touchedX][poop_touchedY]);
+                    Log.d(TAG, "second score"+ debug);
                     nb_touched_poop = 0;
                     invalidate();
                     // swap happen so there is no selected poop
