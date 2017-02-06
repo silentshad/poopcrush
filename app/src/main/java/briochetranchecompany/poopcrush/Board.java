@@ -77,63 +77,78 @@ public class Board
         return grid[x][y];
     }
 
-    public void get_neighbour(int x, int y, ArrayList<Pair<Integer,Integer>> L) // add  unvisited neighbour to L
+    public void get_neighbourH(int x, int y, ArrayList<Pair<Integer,Integer>> L) // add  unvisited neighbour to L
     {
-        Poop poop =get(x,y);
+        Poop poop = get(x, y);
         poop.visited = true;
 
-        if(  isvalid(x-1,y) && !grid[x-1][y].visited && grid[x-1][y].skin == poop.skin   )
-        {
-            get(x-1,y).visited = true;
-            L.add(new Pair<>(x-1, y));
+        int i = 1; // line to the left
+        while (isvalid(x - i, y) && !grid[x - i][y].visited && grid[x - i][y].skin == poop.skin) {
+            get(x - i, y).visited = true;
+            L.add(new Pair<>(x - i, y));
+            i++;
         }
 
-        if(  isvalid(x+1,y) && !grid[x+1][y].visited && grid[x+1][y].skin == poop.skin   )
+        i = 1; // line to the right;
+        while (isvalid(x + i, y) && !grid[x + i][y].visited && grid[x + i][y].skin == poop.skin) {
+            get(x + i, y).visited = true;
+            L.add(new Pair<>(x + i, y));
+            i++;
+        }
+    }
+    public void get_neighbourV(int x, int y, ArrayList<Pair<Integer,Integer>> L) // add  unvisited neighbour to L
+    {
+        Poop poop = get(x, y);
+        poop.visited = true;
+
+        int i = 1; // line to the top
+        while(  isvalid(x,y-i) && !grid[x][y-i].visited && grid[x][y-i].skin == poop.skin   )
         {
-            get(x+1,y).visited = true;
-            L.add(new Pair<>(x+1, y));
+            get(x,y-i).visited = true;
+            L.add(new Pair<>(x, y-i));
+            i++;
         }
 
-        if(  isvalid(x,y-1) && !grid[x][y-1].visited && grid[x][y-1].skin == poop.skin   )
+        i = 1; // to the bottom
+        while(  isvalid(x,y+i) && !grid[x][y+i].visited && grid[x][y+i].skin == poop.skin   )
         {
-            get(x,y-1).visited = true;
-            L.add(new Pair<>(x, y-1));
-        }
-
-        if(  isvalid(x,y+1) && !grid[x][y+1].visited && grid[x][y+1].skin == poop.skin   )
-        {
-            get(x,y+1).visited = true;
-            L.add(new Pair<>(x, y+1));
+            get(x,y+i).visited = true;
+            L.add(new Pair<>(x, y+i));
+            i++;
         }
 
     }
 
     public boolean score_point(int x, int y) // return 0 if not enough poop are touching
     {
-        ArrayList<Pair<Integer,Integer>> neigh_list = new ArrayList<>();
-        get_neighbour(x, y, neigh_list);
-        int same_skin = 1;
-        int i=0;
+        ArrayList<Pair<Integer,Integer>> neigh_listH = new ArrayList<>();
+        ArrayList<Pair<Integer,Integer>> neigh_listV = new ArrayList<>();
 
-        while( i < neigh_list.size() )
+        get_neighbourH(x, y, neigh_listH);
+        get_neighbourV(x, y, neigh_listV);
+
+        int  sizeH =neigh_listH.size();
+        int  sizeV = neigh_listV.size();
+
+
+        if ( sizeH>= thresh-1 &&  sizeV>= thresh-1)
         {
-
-            Poop current = get(neigh_list.get(i).first, neigh_list.get(i).second) ;
-            get_neighbour(neigh_list.get(i).first, neigh_list.get(i).second, neigh_list);
-            current.visited = true;
-            same_skin++;
-
-            i++;
-        }
-        if (same_skin >= thresh)
-        {
-            Log.d(TAG, "score_point: above thresh ");
-
             Poop first = new Poop(Poop.TYPE.EMPTY);
+
             first.skin = poop_count-1;
             grid[x][y] = first;
-            for (Pair<Integer,Integer> p: neigh_list)
+
+            for (Pair<Integer,Integer> p: neigh_listH)
             {
+
+                Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
+                temp_poop.skin = poop_count-1;
+                grid[p.first][p.second] = temp_poop;
+            }
+
+            for (Pair<Integer,Integer> p: neigh_listV)
+            {
+
                 Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
                 temp_poop.skin = poop_count-1;
                 grid[p.first][p.second] = temp_poop;
@@ -141,12 +156,56 @@ public class Board
 
             return true;
         }
+
+        else if (sizeH >= thresh -1)
+        {
+            Poop first = new Poop(Poop.TYPE.EMPTY);
+
+            first.skin = poop_count-1;
+            grid[x][y] = first;
+            for (Pair<Integer,Integer> p: neigh_listH)
+            {
+                Log.d(TAG, " skin :  " + grid[p.first][p.second].skin);
+                Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
+                temp_poop.skin = poop_count-1;
+                grid[p.first][p.second] = temp_poop;
+            }
+
+            for (Pair<Integer,Integer> p: neigh_listV)
+                grid[p.first][p.second].visited = false;
+
+            return true;
+        }
+        else if (sizeV >= thresh-1)
+        {
+            Poop first = new Poop(Poop.TYPE.EMPTY);
+            Log.d(TAG, "original skin :  " + grid[x][y].skin);
+            first.skin = poop_count-1;
+            grid[x][y] = first;
+            for (Pair<Integer,Integer> p: neigh_listV)
+            {
+                Log.d(TAG, " skin :  " + grid[p.first][p.second].skin);
+                Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
+                temp_poop.skin = poop_count-1;
+                grid[p.first][p.second] = temp_poop;
+            }
+
+            for (Pair<Integer,Integer> p: neigh_listH)
+                grid[p.first][p.second].visited = false;
+
+            return true;
+
+        }
         else
         {
-            for (Pair<Integer,Integer> p: neigh_list)
-            {
+            // no point scored
+            grid[x][y].visited = false;
+
+            for (Pair<Integer,Integer> p: neigh_listH)
                grid[p.first][p.second].visited = false;
-            }
+            for (Pair<Integer,Integer> p: neigh_listV)
+                grid[p.first][p.second].visited = false;
+
             return false;
         }
     }

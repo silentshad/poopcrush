@@ -148,7 +148,7 @@ public class Board_View extends View {
         {
             // a poop on the grid was touched and no poop was touched or only one
             nb_touched_poop++;
-
+            Log.d(TAG, "nb touched : "+nb_touched_poop);
 
             if ( nb_touched_poop ==1)
             {
