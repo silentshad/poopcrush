@@ -142,7 +142,7 @@ public class Board_View extends View {
         int poop_touchedX = x/ (view_space.width()/board.width)  ;
         int poop_touchedY = y/ (view_space.height()/board.height);
 
-
+        Log.d(TAG, "onTouchEvent: "+ poop_touchedX);
         if ( board.isvalid(poop_touchedX, poop_touchedY)  && nb_touched_poop < 2
                                                     && event.getAction()==MotionEvent.ACTION_DOWN)
         {

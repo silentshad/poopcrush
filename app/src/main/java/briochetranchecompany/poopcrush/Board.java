@@ -3,6 +3,7 @@ package briochetranchecompany.poopcrush;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -64,6 +65,8 @@ public class Board
         return false;
 
     }
+
+    public ArrayList<Poop> get_neighbour(int x,int y)
 
 }
 

@@ -23,6 +23,9 @@ public class Poop {
     private long point; // for the score
     public boolean gravity; // if the poop can fall
     private  boolean moveable; // can be moved
+    public int x;
+    public int y;
+    public boolean visited;
 
     public boolean isMoveable() {
         return moveable;
