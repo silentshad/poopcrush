@@ -115,7 +115,7 @@ public class Board
         int same_skin = 1;
         int i=0;
 
-        while( !neigh_list.isEmpty() )
+        while( i < neigh_list.size() )
         {
 
             Poop current = get(neigh_list.get(i).first, neigh_list.get(i).second) ;
@@ -128,6 +128,10 @@ public class Board
         if (same_skin >= thresh)
         {
             Log.d(TAG, "score_point: above thresh ");
+
+            Poop first = new Poop(Poop.TYPE.EMPTY);
+            first.skin = poop_count-1;
+            grid[x][y] = first;
             for (Pair<Integer,Integer> p: neigh_list)
             {
                 Poop temp_poop = new Poop(Poop.TYPE.EMPTY);

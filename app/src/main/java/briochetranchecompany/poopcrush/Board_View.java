@@ -165,11 +165,9 @@ public class Board_View extends View {
                     was_touchedX = poop_touchedX;
                     was_touchedY = poop_touchedY;
                 } else {
-                    Log.d(TAG, "swaping done");
-                    boolean debug = board.score_point(board.grid[was_touchedX][was_touchedY]);
-                    Log.d(TAG, "first score"+ debug);
-                    debug = board.score_point( board.grid[poop_touchedX][poop_touchedY]);
-                    Log.d(TAG, "second score"+ debug);
+
+                    board.score_point(was_touchedX, was_touchedY);
+                    board.score_point(poop_touchedX, poop_touchedY);
                     nb_touched_poop = 0;
                     invalidate();
                     // swap happen so there is no selected poop
