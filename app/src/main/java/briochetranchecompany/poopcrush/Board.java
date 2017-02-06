@@ -3,6 +3,7 @@ package briochetranchecompany.poopcrush;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -71,36 +72,54 @@ public class Board
 
     }
 
-    public void get_neighbour(Poop poop, ArrayList<Poop> L) // add  unvisited neighbour to L
+    public Poop get(int x, int y)
     {
-        int x = poop.x;
-        int y = poop.y;
+        return grid[x][y];
+    }
+
+    public void get_neighbour(int x, int y, ArrayList<Pair<Integer,Integer>> L) // add  unvisited neighbour to L
+    {
+        Poop poop =get(x,y);
+        poop.visited = true;
 
         if(  isvalid(x-1,y) && !grid[x-1][y].visited && grid[x-1][y].skin == poop.skin   )
-            L.add(grid[x-1][y]);
+        {
+            get(x-1,y).visited = true;
+            L.add(new Pair<>(x-1, y));
+        }
 
         if(  isvalid(x+1,y) && !grid[x+1][y].visited && grid[x+1][y].skin == poop.skin   )
-            L.add(grid[x+1][y]);
+        {
+            get(x+1,y).visited = true;
+            L.add(new Pair<>(x+1, y));
+        }
 
         if(  isvalid(x,y-1) && !grid[x][y-1].visited && grid[x][y-1].skin == poop.skin   )
-            L.add(grid[x][y-1]);
+        {
+            get(x,y-1).visited = true;
+            L.add(new Pair<>(x, y-1));
+        }
 
         if(  isvalid(x,y+1) && !grid[x][y+1].visited && grid[x][y+1].skin == poop.skin   )
-            L.add(grid[x][y+1]);
+        {
+            get(x,y+1).visited = true;
+            L.add(new Pair<>(x, y+1));
+        }
 
     }
 
-    public boolean score_point(Poop poop) // return 0 if not enough poop are touching
+    public boolean score_point(int x, int y) // return 0 if not enough poop are touching
     {
-        ArrayList<Poop> neigh_list = new ArrayList<>();
-        get_neighbour( poop, neigh_list);
+        ArrayList<Pair<Integer,Integer>> neigh_list = new ArrayList<>();
+        get_neighbour(x, y, neigh_list);
         int same_skin = 1;
+        int i=0;
 
         while( !neigh_list.isEmpty() )
         {
-            int i=0;
-            Poop current = neigh_list.get(i);
-            get_neighbour(current, neigh_list);
+
+            Poop current = get(neigh_list.get(i).first, neigh_list.get(i).second) ;
+            get_neighbour(neigh_list.get(i).first, neigh_list.get(i).second, neigh_list);
             current.visited = true;
             same_skin++;
 
@@ -109,20 +128,20 @@ public class Board
         if (same_skin >= thresh)
         {
             Log.d(TAG, "score_point: above thresh ");
-            for (Poop p: neigh_list)
+            for (Pair<Integer,Integer> p: neigh_list)
             {
                 Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
                 temp_poop.skin = poop_count-1;
-                grid[p.x][p.y] = temp_poop;
+                grid[p.first][p.second] = temp_poop;
             }
 
             return true;
         }
         else
         {
-            for (Poop p: neigh_list)
+            for (Pair<Integer,Integer> p: neigh_list)
             {
-               grid[p.x][p.y].visited = false;
+               grid[p.first][p.second].visited = false;
             }
             return false;
         }
