@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.widget.RelativeLayout;
 import java.lang.reflect.Array;
 
 import static android.content.ContentValues.TAG;
+import static android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE;
 
 
 /**
@@ -164,13 +166,48 @@ public class Board_View extends View {
                     nb_touched_poop = 1;
                     was_touchedX = poop_touchedX;
                     was_touchedY = poop_touchedY;
+
+
+
                 } else {
 
-                    board.score_point(was_touchedX, was_touchedY);
-                    board.score_point(poop_touchedX, poop_touchedY);
+                    boolean scored1 = board.score_point(was_touchedX, was_touchedY);
+                    boolean scored2 = board.score_point(poop_touchedX, poop_touchedY);
+
+                    if( !(scored1 || scored2) )
+                        board.swapping(was_touchedX,was_touchedY,poop_touchedX,poop_touchedY);
+
                     nb_touched_poop = 0;
                     invalidate();
                     // swap happen so there is no selected poop
+
+                    Pair<Integer,Integer> empty = board.empty_check();
+                    Log.d(TAG, "empty " + empty.first +"|" + empty.second);
+                    while ( empty.first != -1)
+                    {
+                        Log.d(TAG, "empty " + empty.first+"|" +empty.second);
+                        int count_empty = 0;
+                        for (int t = empty.second; t>=0 && board.get(empty.first,t).type == Poop.TYPE.EMPTY; t-- )
+                            count_empty ++;
+
+                        Log.d(TAG, "count empty: " + count_empty);
+
+                        if (empty.second - count_empty >=0)
+                        {   // some poops need to fall
+                            board.fall(empty.first, empty.second - count_empty, count_empty);
+                        }
+
+                        // create new poop
+                        for (int i = 0 ; i< count_empty ;i++)
+                        {
+                            board.defecate(empty.first,i);
+                        }
+
+
+
+                        empty = board.empty_check();
+                    }
+                    invalidate();
                 }
             }
                 return true;

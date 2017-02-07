@@ -167,7 +167,7 @@ public class Board
             grid[x][y] = first;
             for (Pair<Integer,Integer> p: neigh_listH)
             {
-                Log.d(TAG, " skin :  " + grid[p.first][p.second].skin);
+
                 Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
                 temp_poop.skin = poop_count-1;
                 grid[p.first][p.second] = temp_poop;
@@ -181,12 +181,11 @@ public class Board
         else if (sizeV >= thresh-1)
         {
             Poop first = new Poop(Poop.TYPE.EMPTY);
-            Log.d(TAG, "original skin :  " + grid[x][y].skin);
+
             first.skin = poop_count-1;
             grid[x][y] = first;
             for (Pair<Integer,Integer> p: neigh_listV)
             {
-                Log.d(TAG, " skin :  " + grid[p.first][p.second].skin);
                 Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
                 temp_poop.skin = poop_count-1;
                 grid[p.first][p.second] = temp_poop;
@@ -212,7 +211,7 @@ public class Board
         }
     }
 
-    public Poop defecate(int x, int y)
+    public void defecate(int x, int y)
     {
         Poop poop = new Poop(Poop.TYPE.BASIC);
         // give the skin
@@ -220,30 +219,49 @@ public class Board
         grid[x][y] = poop ;
     }
 
-    public int empty_check()
+    public Pair<Integer,Integer> empty_check()
     {
-        int nb_empty =0;
-        for (int i =0 ; i< width ; i= i+1)
+        Log.d(TAG, "czcz: ");
+       Pair<Integer,Integer>  empty_poop = new Pair<>(-1,-1); ;
+        boolean found = false;
+
+        int  i = width -1;
+
+       while( i>= 0 && !found )
         {
-            for (int j = 0; j< height ; j++)
+            int j = height -1;
+            while(j>= 0 && !found )
             {
+
+                //Log.d(TAG, "empty_check: " +j);
                 if( get(i,j).type == Poop.TYPE.EMPTY)
-                    nb_empty++;
+                {
+                    found = true;
+                    empty_poop = new  Pair<>(i,j);
+                }
+
+                j--;
             }
+
+            i--;
         }
-        return nb_empty;
+        return empty_poop;
     }
 
     public void fall(int x, int y ,int count)
     // y is where the first poop needs to fall by count block
     // should not be call if y =0
     {
-        Assert.assertEquals("no poops need to fall",y+1,1);
+
+
         for (int j = y ; j>= 0 ; j--)
         {
             grid[x][j+count] = grid[x][j];
         }
     }
+
+
+
 
 }
 
