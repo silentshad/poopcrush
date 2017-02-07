@@ -23,6 +23,7 @@ public class Poop {
     private long point; // for the score
     public boolean gravity; // if the poop can fall
     private  boolean moveable; // can be moved
+    TYPE type;
 
     public boolean visited;
 
@@ -48,6 +49,7 @@ public class Poop {
 
     public Poop( TYPE type)
     {
+        this.type =type;
         switch (type)
         {
             case BASIC:

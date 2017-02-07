@@ -5,6 +5,8 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.Pair;
 
+import junit.framework.Assert;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -207,6 +209,39 @@ public class Board
                 grid[p.first][p.second].visited = false;
 
             return false;
+        }
+    }
+
+    public Poop defecate(int x, int y)
+    {
+        Poop poop = new Poop(Poop.TYPE.BASIC);
+        // give the skin
+        poop.skin = rand.nextInt(poop_count-1);
+        grid[x][y] = poop ;
+    }
+
+    public int empty_check()
+    {
+        int nb_empty =0;
+        for (int i =0 ; i< width ; i= i+1)
+        {
+            for (int j = 0; j< height ; j++)
+            {
+                if( get(i,j).type == Poop.TYPE.EMPTY)
+                    nb_empty++;
+            }
+        }
+        return nb_empty;
+    }
+
+    public void fall(int x, int y ,int count)
+    // y is where the first poop needs to fall by count block
+    // should not be call if y =0
+    {
+        Assert.assertEquals("no poops need to fall",y+1,1);
+        for (int j = y ; j>= 0 ; j--)
+        {
+            grid[x][j+count] = grid[x][j];
         }
     }
 
