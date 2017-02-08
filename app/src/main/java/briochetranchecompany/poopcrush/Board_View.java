@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
@@ -39,12 +40,16 @@ public class Board_View extends View {
     Drawable[] poop_skins;
     Rect view_space;
 
+    float offset_decrease;
+    float scroll_speed = 4f; // nb of block by second or not but increasing it speed up the draw
+
     public Board_View(Context context , AttributeSet attrs)
     {
 
         super(context, attrs);
-        nb_touched_poop =0;
-        was_touchedX =0;
+        offset_decrease =0;
+        nb_touched_poop = 0;
+        was_touchedX = 0;
         was_touchedY = 0;
         board = new Board();
         block = new Rect();
@@ -60,30 +65,60 @@ public class Board_View extends View {
             poop_skins[i] = poop_skin_xml.getDrawable(i);
         }
         poop_skin_xml.recycle();
+
+
     }
 
    public void onDraw(Canvas canvas)
     {
-
+        long time = System.currentTimeMillis();
 
         super.onDraw(canvas);
         View game_layout =   findViewById(R.id.board_view);
         float block_h = game_layout.getHeight() /  (float)board.height;
         float block_w = game_layout.getWidth() /(float)board.width;
 
+        boolean redraw = false;
+
+
+
         for (int i= 0 ; i<game_layout.getWidth(); i+= block_w )
         {
             for (int j= 0 ; j< game_layout.getHeight(); j+= block_h )
             {
+                Poop current =  board.get((int) (i/block_w), (int) (j/block_h));
+                float offset = current.getOffset() * block_h;
+
+                if(offset!= 0 ) {
+
+                    redraw = true;
+                    offset  -=  offset_decrease;
+                    offset = offset < 0 ? 0 :offset;
+                    Log.d(TAG, "offset : "+offset);
+                    Log.d(TAG, "offset decreased :  " + offset_decrease);
+                }
                 block.left = i;
-                block.top = j;
-                block.bottom = j +(int) block_h;
+                block.top =(int) ((float) j -  offset);
+                block.bottom = (int) ( (float) j + block_h - offset);
                 block.right = i + (int) block_w;
-                poop_png = poop_skins[ board.grid[(int) (i/block_w)][(int) (j/block_h)].skin];
+
+                current.setOffset(offset/block_h);
+
+                poop_png = poop_skins[ current.skin];
                 poop_png.setBounds(block);
                 poop_png.draw(canvas);
 ;            }
         }
+
+        if (redraw)
+        {
+            Log.d(TAG, "time : " + (System.currentTimeMillis()-time));
+            offset_decrease = (float) ((scroll_speed* block_h) * ( 0.01*( System.currentTimeMillis()- time)) );
+            invalidate();
+        }
+        else
+            offset_decrease = 0;
+
     }
 
 
@@ -180,39 +215,47 @@ public class Board_View extends View {
                     nb_touched_poop = 0;
                     invalidate();
                     // swap happen so there is no selected poop
-
-                    Pair<Integer,Integer> empty = board.empty_check();
-                    Log.d(TAG, "empty " + empty.first +"|" + empty.second);
-                    while ( empty.first != -1)
-                    {
-                        Log.d(TAG, "empty " + empty.first+"|" +empty.second);
-                        int count_empty = 0;
-                        for (int t = empty.second; t>=0 && board.get(empty.first,t).type == Poop.TYPE.EMPTY; t-- )
-                            count_empty ++;
-
-                        Log.d(TAG, "count empty: " + count_empty);
-
-                        if (empty.second - count_empty >=0)
-                        {   // some poops need to fall
-                            board.fall(empty.first, empty.second - count_empty, count_empty);
-                        }
-
-                        // create new poop
-                        for (int i = 0 ; i< count_empty ;i++)
-                        {
-                            board.defecate(empty.first,i);
-                        }
+                    board_check();
 
 
 
-                        empty = board.empty_check();
-                    }
-                    invalidate();
                 }
             }
                 return true;
         }
 
         return false;
+    }
+
+    public void board_check()
+    {
+        Pair<Integer,Integer> empty = board.empty_check();
+        while ( empty.first != -1)
+        {
+            int count_empty = 0;
+            for (int t = empty.second; t>=0 && board.get(empty.first,t).type == Poop.TYPE.EMPTY; t-- )
+                count_empty ++;
+
+            if (empty.second - count_empty >=0)
+            {   // some poops need to fall
+                board.fall(empty.first, empty.second - count_empty, count_empty);
+
+                // verifies if the fall score point
+                for (int i = 0; i<count_empty ;i++)
+                    board.score_point(empty.first,empty.second-i);
+            }
+
+            // create new poop
+            for (int i = 0 ; i< count_empty ;i++)
+            {
+                board.defecate(empty.first,i,count_empty);
+               // board.score_point(empty.first,i);
+            }
+
+
+
+            empty = board.empty_check();
+        }
+        invalidate();
     }
 }

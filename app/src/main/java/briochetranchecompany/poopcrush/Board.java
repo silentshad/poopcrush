@@ -211,17 +211,17 @@ public class Board
         }
     }
 
-    public void defecate(int x, int y)
+    public void defecate(int x, int y, float offset)
     {
         Poop poop = new Poop(Poop.TYPE.BASIC);
         // give the skin
         poop.skin = rand.nextInt(poop_count-1);
+        poop.setOffset(offset);
         grid[x][y] = poop ;
     }
 
     public Pair<Integer,Integer> empty_check()
     {
-        Log.d(TAG, "czcz: ");
        Pair<Integer,Integer>  empty_poop = new Pair<>(-1,-1); ;
         boolean found = false;
 
@@ -257,6 +257,8 @@ public class Board
         for (int j = y ; j>= 0 ; j--)
         {
             grid[x][j+count] = grid[x][j];
+            get(x,j+count).setOffset(count);
+
         }
     }
 
