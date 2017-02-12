@@ -66,11 +66,12 @@ public class Board_View extends View {
         }
         poop_skin_xml.recycle();
 
-
+        invalidate();
     }
 
    public void onDraw(Canvas canvas)
     {
+
         long time = System.currentTimeMillis();
 
         super.onDraw(canvas);
@@ -79,6 +80,7 @@ public class Board_View extends View {
         float block_w = game_layout.getWidth() /(float)board.width;
 
         boolean redraw = false;
+        board_full_score_check();
 
 
 
@@ -94,8 +96,8 @@ public class Board_View extends View {
                     redraw = true;
                     offset  -=  offset_decrease;
                     offset = offset < 0 ? 0 :offset;
-                    Log.d(TAG, "offset : "+offset);
-                    Log.d(TAG, "offset decreased :  " + offset_decrease);
+                    /*Log.d(TAG, "offset : "+offset);
+                    Log.d(TAG, "offset decreased :  " + offset_decrease);*/
                 }
                 block.left = i;
                 block.top =(int) ((float) j -  offset);
@@ -112,12 +114,12 @@ public class Board_View extends View {
 
         if (redraw)
         {
-            Log.d(TAG, "time : " + (System.currentTimeMillis()-time));
             offset_decrease = (float) ((scroll_speed* block_h) * ( 0.01*( System.currentTimeMillis()- time)) );
             invalidate();
         }
-        else
+        else {
             offset_decrease = 0;
+        }
 
     }
 
@@ -129,8 +131,8 @@ public class Board_View extends View {
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-        int desiredWidth = (int)(0.8f * (float)widthSize) ;
-        int desiredHeight = (int) (0.6f * (float)heightSize);
+        int desiredWidth = (int)(0.75f * (float)widthSize) ;
+        int desiredHeight = (int) (1f * (float)heightSize);
 
 
         int width;
@@ -179,13 +181,14 @@ public class Board_View extends View {
         int poop_touchedX = x/ (view_space.width()/board.width)  ;
         int poop_touchedY = y/ (view_space.height()/board.height);
 
+        //Log.d(TAG, "touched poop" + poop_touchedX+"|" +poop_touchedY);
+
 
         if ( board.isvalid(poop_touchedX, poop_touchedY)  && nb_touched_poop < 2
                                                     && event.getAction()==MotionEvent.ACTION_DOWN)
         {
             // a poop on the grid was touched and no poop was touched or only one
             nb_touched_poop++;
-            Log.d(TAG, "nb touched : "+nb_touched_poop);
 
             if ( nb_touched_poop ==1)
             {
@@ -195,7 +198,9 @@ public class Board_View extends View {
 
             else
             {
-                if (!( board.swapping(was_touchedX,was_touchedY,poop_touchedX,poop_touchedY) )) {
+               Log.d(TAG, "swap?" +board.swapping(was_touchedX,was_touchedY,poop_touchedX,poop_touchedY));
+                if (!( board.swapping(was_touchedX,was_touchedY,poop_touchedX,poop_touchedY) )) 
+                {
                     // swapping was not valid
                     //therefore only the last click  count
                     nb_touched_poop = 1;
@@ -204,58 +209,47 @@ public class Board_View extends View {
 
 
 
-                } else {
+                } 
+                else 
+                {
+                    long score =  board_full_score_check();
+                    if( score == 0)  {
+                        board.swapping(was_touchedX, was_touchedY, poop_touchedX, poop_touchedY);
+                        nb_touched_poop =1;
+                        was_touchedX = poop_touchedX;
+                        was_touchedY = poop_touchedY;
+                    }
+                    // no score so redo swap
 
-                    boolean scored1 = board.score_point(was_touchedX, was_touchedY);
-                    boolean scored2 = board.score_point(poop_touchedX, poop_touchedY);
-
-                    if( !(scored1 || scored2) )
-                        board.swapping(was_touchedX,was_touchedY,poop_touchedX,poop_touchedY);
-
+                    else
                     nb_touched_poop = 0;
-                    invalidate();
                     // swap happen so there is no selected poop
-                    board_check();
-
-
-
                 }
             }
                 return true;
         }
-
+       // nb_touched_poop = 0;
         return false;
     }
 
-    public void board_check()
+    public long board_full_score_check()
     {
-        Pair<Integer,Integer> empty = board.empty_check();
-        while ( empty.first != -1)
+        long score = 0;
+        for (int i = 0 ; i< board.width; i++)
         {
-            int count_empty = 0;
-            for (int t = empty.second; t>=0 && board.get(empty.first,t).type == Poop.TYPE.EMPTY; t-- )
-                count_empty ++;
-
-            if (empty.second - count_empty >=0)
-            {   // some poops need to fall
-                board.fall(empty.first, empty.second - count_empty, count_empty);
-
-                // verifies if the fall score point
-                for (int i = 0; i<count_empty ;i++)
-                    board.score_point(empty.first,empty.second-i);
-            }
-
-            // create new poop
-            for (int i = 0 ; i< count_empty ;i++)
+            for (int j = 0; j< board.height ; j++)
             {
-                board.defecate(empty.first,i,count_empty);
-               // board.score_point(empty.first,i);
+                long this_score = board.score_and_destroy(i,j);
+                if (this_score != 0)
+                {
+                    score += this_score ;
+                    board.fill();
+                    invalidate();
+                }
             }
-
-
-
-            empty = board.empty_check();
         }
-        invalidate();
+        return score;
     }
+
+
 }

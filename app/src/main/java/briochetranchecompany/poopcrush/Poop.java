@@ -26,8 +26,6 @@ public class Poop {
     private float offset; // number of poop.height  the block need to fall
     TYPE type;
 
-    public boolean visited;
-
     public boolean isMoveable() {
         return moveable;
     }
@@ -64,14 +62,14 @@ public class Poop {
                 //  the skin need to be attributed after depending on which poop we want
                 gravity = true;
                 life = 1;
-                point = 5000000;
+                point = 50000;
                 moveable = true;
                 break;
             case EXPLOSIVE:
                 //  the skin need to be attributed after depending on which poop we want
                 gravity = true;
                 life = 1;
-                point = 500000000;
+                point = 5000000;
                 moveable = true;
                 break;
             case NONE:

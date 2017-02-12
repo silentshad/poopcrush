@@ -57,7 +57,7 @@ public class Board
     {
         Poop poop1 = grid[x1][y1];
         Poop poop2 = grid[x2][y2];
-        if ( poop1.isMoveable() && poop2.isMoveable())
+        if ( poop1.isMoveable() && poop2.isMoveable() && poop1.getOffset() == 0 && poop2.getOffset() == 0)
         {
             int a = x1-x2;
             int b = y1-y2;
@@ -82,18 +82,16 @@ public class Board
     public void get_neighbourH(int x, int y, ArrayList<Pair<Integer,Integer>> L) // add  unvisited neighbour to L
     {
         Poop poop = get(x, y);
-        poop.visited = true;
 
         int i = 1; // line to the left
-        while (isvalid(x - i, y) && !grid[x - i][y].visited && grid[x - i][y].skin == poop.skin) {
-            get(x - i, y).visited = true;
+        while (isvalid(x - i, y)  && grid[x - i][y].skin == poop.skin && get(x-i,y).getOffset() == 0) {
             L.add(new Pair<>(x - i, y));
             i++;
         }
 
         i = 1; // line to the right;
-        while (isvalid(x + i, y) && !grid[x + i][y].visited && grid[x + i][y].skin == poop.skin) {
-            get(x + i, y).visited = true;
+        while (isvalid(x + i, y)  && grid[x + i][y].skin == poop.skin && get(x+i,y).getOffset() == 0)
+        {
             L.add(new Pair<>(x + i, y));
             i++;
         }
@@ -101,27 +99,24 @@ public class Board
     public void get_neighbourV(int x, int y, ArrayList<Pair<Integer,Integer>> L) // add  unvisited neighbour to L
     {
         Poop poop = get(x, y);
-        poop.visited = true;
 
         int i = 1; // line to the top
-        while(  isvalid(x,y-i) && !grid[x][y-i].visited && grid[x][y-i].skin == poop.skin   )
+        while(  isvalid(x,y-i) && grid[x][y-i].skin == poop.skin  && get(x,y-i).getOffset() == 0)
         {
-            get(x,y-i).visited = true;
             L.add(new Pair<>(x, y-i));
             i++;
         }
 
         i = 1; // to the bottom
-        while(  isvalid(x,y+i) && !grid[x][y+i].visited && grid[x][y+i].skin == poop.skin   )
+        while(  isvalid(x,y+i) && grid[x][y+i].skin == poop.skin && get(x,y+i).getOffset() == 0)
         {
-            get(x,y+i).visited = true;
             L.add(new Pair<>(x, y+i));
             i++;
         }
 
     }
 
-    public boolean score_point(int x, int y) // return 0 if not enough poop are touching
+    public long score_and_destroy(int x, int y) // return 0 if not enough poop are touching
     {
         ArrayList<Pair<Integer,Integer>> neigh_listH = new ArrayList<>();
         ArrayList<Pair<Integer,Integer>> neigh_listV = new ArrayList<>();
@@ -129,86 +124,51 @@ public class Board
         get_neighbourH(x, y, neigh_listH);
         get_neighbourV(x, y, neigh_listV);
 
-        int  sizeH =neigh_listH.size();
+        int  sizeH = neigh_listH.size();
         int  sizeV = neigh_listV.size();
 
+        //Log.d(TAG, "score_pointH: " + sizeH);
+       // Log.d(TAG, "score_pointV: " + sizeV);
 
-        if ( sizeH>= thresh-1 &&  sizeV>= thresh-1)
+        long score = 0;
+
+
+        if ( sizeH>= thresh-1 ||  sizeV>= thresh-1)
         {
             Poop first = new Poop(Poop.TYPE.EMPTY);
-
-            first.skin = poop_count-1;
+            score += get(x,y).getPoint();
+            first.skin = poop_count - 1;
             grid[x][y] = first;
 
-            for (Pair<Integer,Integer> p: neigh_listH)
+
+            if (sizeH >= thresh - 1)
             {
+                for (Pair<Integer, Integer> p : neigh_listH)
+                {
+                    score += get(p.first,p.second).getPoint();
+                    Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
+                    temp_poop.skin = poop_count - 1;
+                    grid[p.first][p.second] = temp_poop;
 
-                Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
-                temp_poop.skin = poop_count-1;
-                grid[p.first][p.second] = temp_poop;
+                }
             }
-
-            for (Pair<Integer,Integer> p: neigh_listV)
+            if (sizeV >= thresh - 1)
             {
+                for (Pair<Integer, Integer> p : neigh_listV)
+                {
+                    score += get(p.first,p.second).getPoint();
+                    Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
+                    temp_poop.skin = poop_count - 1;
+                    grid[p.first][p.second] = temp_poop;
+                }
 
-                Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
-                temp_poop.skin = poop_count-1;
-                grid[p.first][p.second] = temp_poop;
+
             }
-
-            return true;
-        }
-
-        else if (sizeH >= thresh -1)
-        {
-            Poop first = new Poop(Poop.TYPE.EMPTY);
-
-            first.skin = poop_count-1;
-            grid[x][y] = first;
-            for (Pair<Integer,Integer> p: neigh_listH)
-            {
-
-                Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
-                temp_poop.skin = poop_count-1;
-                grid[p.first][p.second] = temp_poop;
-            }
-
-            for (Pair<Integer,Integer> p: neigh_listV)
-                grid[p.first][p.second].visited = false;
-
-            return true;
-        }
-        else if (sizeV >= thresh-1)
-        {
-            Poop first = new Poop(Poop.TYPE.EMPTY);
-
-            first.skin = poop_count-1;
-            grid[x][y] = first;
-            for (Pair<Integer,Integer> p: neigh_listV)
-            {
-                Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
-                temp_poop.skin = poop_count-1;
-                grid[p.first][p.second] = temp_poop;
-            }
-
-            for (Pair<Integer,Integer> p: neigh_listH)
-                grid[p.first][p.second].visited = false;
-
-            return true;
-
+            return score;
         }
         else
-        {
-            // no point scored
-            grid[x][y].visited = false;
+            return score;
 
-            for (Pair<Integer,Integer> p: neigh_listH)
-               grid[p.first][p.second].visited = false;
-            for (Pair<Integer,Integer> p: neigh_listV)
-                grid[p.first][p.second].visited = false;
-
-            return false;
-        }
     }
 
     public void defecate(int x, int y, float offset)
@@ -222,7 +182,7 @@ public class Board
 
     public Pair<Integer,Integer> empty_check()
     {
-       Pair<Integer,Integer>  empty_poop = new Pair<>(-1,-1); ;
+       Pair<Integer,Integer>  empty_poop = null;
         boolean found = false;
 
         int  i = width -1;
@@ -250,19 +210,48 @@ public class Board
 
     public void fall(int x, int y ,int count)
     // y is where the first poop needs to fall by count block
-    // should not be call if y =0
+
     {
-
-
-        for (int j = y ; j>= 0 ; j--)
+        if (y <= 0)
         {
-            grid[x][j+count] = grid[x][j];
-            get(x,j+count).setOffset(count);
+            for (int j = y; j >= 0; j--) {
+                grid[x][j + count] = grid[x][j];
+                get(x, j + count).setOffset(count);
 
+            }
         }
     }
 
+    public void  fill()
+    {
+        boolean full = false;
+        while (!full)
+        {
+            Pair<Integer,Integer>  current = empty_check() ;
+            if (current != null )
+            {
+                int j = current.second ;
+                int count = 0;
+                // count the number of empty block above the current one
+                while (j >=0 && get(current.first,j).type == Poop.TYPE.EMPTY )
+                {
+                    count++;
+                    j--;
+                }
+                fall(current.first, j, count);
 
+                j = 0 ;
+                while (j < height && get(current.first,j).type == Poop.TYPE.EMPTY )
+                {
+                    defecate( current.first, j , count);
+                    j++;
+                }
+            }
+            else
+                full = true;
+        }
+
+    }
 
 
 }
