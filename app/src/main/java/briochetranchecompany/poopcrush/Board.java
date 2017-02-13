@@ -55,9 +55,10 @@ public class Board
 
     public boolean swapping(int x1, int y1, int x2 , int y2)
     {
+        //Log.d(TAG, "swapping: "+ x1 +"|"+y1 +"   and    "+ x2+"|"+y2);
         Poop poop1 = grid[x1][y1];
         Poop poop2 = grid[x2][y2];
-        if ( poop1.isMoveable() && poop2.isMoveable() && poop1.getOffset() == 0 && poop2.getOffset() == 0)
+        if ( poop1.isMoveable() && poop2.isMoveable() && poop1.getOffset() == 0.f && poop2.getOffset() == 0.f)
         {
             int a = x1-x2;
             int b = y1-y2;
@@ -212,7 +213,7 @@ public class Board
     // y is where the first poop needs to fall by count block
 
     {
-        if (y <= 0)
+        if (y >= 0)
         {
             for (int j = y; j >= 0; j--) {
                 grid[x][j + count] = grid[x][j];
@@ -251,6 +252,17 @@ public class Board
                 full = true;
         }
 
+    }
+
+    public  void decrease_offset( float decrease)
+    {
+        for (int i = 0; i< width ; i++)
+        {
+            for (int j = 0 ; j< height ; j++)
+            {
+                get(i,j).setOffset( get(i,j).getOffset() - decrease);
+            }
+        }
     }
 
 

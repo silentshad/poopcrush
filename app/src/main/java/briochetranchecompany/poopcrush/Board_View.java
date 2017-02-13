@@ -41,7 +41,7 @@ public class Board_View extends View {
     Rect view_space;
 
     float offset_decrease;
-    float scroll_speed = 4f; // nb of block by second or not but increasing it speed up the draw
+    float scroll_speed = 8f; // nb of block by second or not but increasing it speed up the draw
 
     public Board_View(Context context , AttributeSet attrs)
     {
@@ -81,30 +81,24 @@ public class Board_View extends View {
 
         boolean redraw = false;
         board_full_score_check();
-
-
-
-        for (int i= 0 ; i<game_layout.getWidth(); i+= block_w )
+        board.decrease_offset( offset_decrease);
+        for (int i= 0 ; i<board.width; i++ )
         {
-            for (int j= 0 ; j< game_layout.getHeight(); j+= block_h )
+            for (int j= 0 ; j< board.height; j++ )
             {
-                Poop current =  board.get((int) (i/block_w), (int) (j/block_h));
+                Poop current =  board.get(i,j);
                 float offset = current.getOffset() * block_h;
 
                 if(offset!= 0 ) {
 
                     redraw = true;
-                    offset  -=  offset_decrease;
-                    offset = offset < 0 ? 0 :offset;
                     /*Log.d(TAG, "offset : "+offset);
                     Log.d(TAG, "offset decreased :  " + offset_decrease);*/
                 }
-                block.left = i;
-                block.top =(int) ((float) j -  offset);
-                block.bottom = (int) ( (float) j + block_h - offset);
-                block.right = i + (int) block_w;
-
-                current.setOffset(offset/block_h);
+                block.left =(int) (i*block_w);
+                block.top =(int) (block_h * j -  offset);
+                block.bottom = (int) (block.top + block_h);
+                block.right = (int) (block.left + block_w);
 
                 poop_png = poop_skins[ current.skin];
                 poop_png.setBounds(block);
@@ -114,11 +108,12 @@ public class Board_View extends View {
 
         if (redraw)
         {
-            offset_decrease = (float) ((scroll_speed* block_h) * ( 0.01*( System.currentTimeMillis()- time)) );
+            offset_decrease = (float) ((scroll_speed) * ( 0.001*( System.currentTimeMillis()- time)) );
             invalidate();
         }
         else {
             offset_decrease = 0;
+            board_full_score_check();
         }
 
     }
@@ -181,7 +176,7 @@ public class Board_View extends View {
         int poop_touchedX = x/ (view_space.width()/board.width)  ;
         int poop_touchedY = y/ (view_space.height()/board.height);
 
-        //Log.d(TAG, "touched poop" + poop_touchedX+"|" +poop_touchedY);
+        Log.d(TAG, "touched poop" + poop_touchedX+"|" +poop_touchedY);
 
 
         if ( board.isvalid(poop_touchedX, poop_touchedY)  && nb_touched_poop < 2
@@ -198,7 +193,7 @@ public class Board_View extends View {
 
             else
             {
-               Log.d(TAG, "swap?" +board.swapping(was_touchedX,was_touchedY,poop_touchedX,poop_touchedY));
+
                 if (!( board.swapping(was_touchedX,was_touchedY,poop_touchedX,poop_touchedY) )) 
                 {
                     // swapping was not valid
@@ -206,34 +201,35 @@ public class Board_View extends View {
                     nb_touched_poop = 1;
                     was_touchedX = poop_touchedX;
                     was_touchedY = poop_touchedY;
-
-
-
                 } 
                 else 
                 {
+                    Log.d(TAG, "reuss swap: ");
                     long score =  board_full_score_check();
+                    Log.d(TAG, "score: " + score);
                     if( score == 0)  {
                         board.swapping(was_touchedX, was_touchedY, poop_touchedX, poop_touchedY);
                         nb_touched_poop =1;
                         was_touchedX = poop_touchedX;
                         was_touchedY = poop_touchedY;
+                        invalidate();
                     }
                     // no score so redo swap
 
                     else
                     nb_touched_poop = 0;
+
                     // swap happen so there is no selected poop
                 }
             }
                 return true;
         }
-       // nb_touched_poop = 0;
         return false;
     }
 
     public long board_full_score_check()
     {
+
         long score = 0;
         for (int i = 0 ; i< board.width; i++)
         {
@@ -244,10 +240,10 @@ public class Board_View extends View {
                 {
                     score += this_score ;
                     board.fill();
-                    invalidate();
                 }
             }
         }
+        invalidate();
         return score;
     }
 

@@ -55,7 +55,7 @@ public class Poop {
     public Poop( TYPE type)
     {
         this.type =type;
-        offset = 0f;
+        offset = 0.f;
         switch (type)
         {
             case BASIC:
