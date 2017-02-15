@@ -58,16 +58,43 @@ public class Board
         //Log.d(TAG, "swapping: "+ x1 +"|"+y1 +"   and    "+ x2+"|"+y2);
         Poop poop1 = grid[x1][y1];
         Poop poop2 = grid[x2][y2];
-        if ( poop1.isMoveable() && poop2.isMoveable() && poop1.getOffset() == 0.f && poop2.getOffset() == 0.f)
+
+
+        if ( poop1.isMoveable() && poop2.isMoveable() && !poop1.getMoving() && !poop2.getMoving())
         {
             int a = x1-x2;
             int b = y1-y2;
 
-            if( (Math.abs(a) == 1 && b==0) || (Math.abs(b) == 1 && a==0))
+            if( (Math.abs(a) == 1 && b==0) ) // vertical swap
             {
                 grid[x1][y1] = poop2;
                 grid[x2][y2] = poop1;
-                return true;
+                if (swifth_score_check(x1,y1) || swifth_score_check(x2,y2)) {
+                    poop2.setSwapV_offset((float) b, height);
+                    poop1.setSwapV_offset((float) (y2 - y1), height);
+                    return true;
+                }
+                else
+                {
+                    grid[x1][y1] = poop1;
+                    grid[x2][y2] = poop2;
+                    return  false;
+                }
+            }
+            else if (Math.abs(b) == 1 && a==0) // horizontal swap
+            {
+                grid[x1][y1] = poop2;
+                grid[x2][y2] = poop1;
+                if (swifth_score_check(x1,y1) || swifth_score_check(x2,y2)) {
+                    poop2.setSwapH_offset((float) a, width);
+                    poop1.setSwapH_offset((float) (x2 - x1), width);
+                    return true;
+                }
+                else {
+                    grid[x1][y1] = poop1;
+                    grid[x2][y2] = poop2;
+                    return false;
+                }
             }
             return  false;
         }
@@ -85,13 +112,13 @@ public class Board
         Poop poop = get(x, y);
 
         int i = 1; // line to the left
-        while (isvalid(x - i, y)  && grid[x - i][y].skin == poop.skin && get(x-i,y).getOffset() == 0) {
+        while (isvalid(x - i, y)  && grid[x - i][y].skin == poop.skin && !get(x-i,y).getMoving()) {
             L.add(new Pair<>(x - i, y));
             i++;
         }
 
         i = 1; // line to the right;
-        while (isvalid(x + i, y)  && grid[x + i][y].skin == poop.skin && get(x+i,y).getOffset() == 0)
+        while (isvalid(x + i, y)  && grid[x + i][y].skin == poop.skin && !get(x+i,y).getMoving())
         {
             L.add(new Pair<>(x + i, y));
             i++;
@@ -102,14 +129,14 @@ public class Board
         Poop poop = get(x, y);
 
         int i = 1; // line to the top
-        while(  isvalid(x,y-i) && grid[x][y-i].skin == poop.skin  && get(x,y-i).getOffset() == 0)
+        while(  isvalid(x,y-i) && grid[x][y-i].skin == poop.skin  && !get(x,y-i).getMoving())
         {
             L.add(new Pair<>(x, y-i));
             i++;
         }
 
         i = 1; // to the bottom
-        while(  isvalid(x,y+i) && grid[x][y+i].skin == poop.skin && get(x,y+i).getOffset() == 0)
+        while(  isvalid(x,y+i) && grid[x][y+i].skin == poop.skin && !get(x,y+i).getMoving())
         {
             L.add(new Pair<>(x, y+i));
             i++;
@@ -170,6 +197,22 @@ public class Board
         else
             return score;
 
+    }
+
+    public boolean swifth_score_check (int x, int y)
+    {
+         ArrayList<Pair<Integer,Integer>> neigh_listH = new ArrayList<>();
+        ArrayList<Pair<Integer,Integer>> neigh_listV = new ArrayList<>();
+
+        get_neighbourH(x, y, neigh_listH);
+        get_neighbourV(x, y, neigh_listV);
+
+        int  sizeH = neigh_listH.size();
+        int  sizeV = neigh_listV.size();
+
+        //Log.d(TAG, "swifth_score_check: " + (sizeH > thresh-1 || sizeV > thresh-1) );
+
+        return sizeH >= thresh-1 || sizeV >= thresh-1;
     }
 
     public void defecate(int x, int y, float offset)
@@ -260,7 +303,10 @@ public class Board
         {
             for (int j = 0 ; j< height ; j++)
             {
-                get(i,j).setOffset( get(i,j).getOffset() - decrease);
+                Poop current = get(i,j);
+                current.setOffset( current.getOffset() - decrease);
+                current.setSwapV_offset( current.getSwapV_offset() - decrease , height);
+                current.setSwapH_offset( current.getSwapH_offset() - decrease , width);
             }
         }
     }

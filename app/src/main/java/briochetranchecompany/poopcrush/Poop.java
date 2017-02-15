@@ -24,7 +24,41 @@ public class Poop {
     public boolean gravity; // if the poop can fall
     private  boolean moveable; // can be moved
     private float offset; // number of poop.height  the block need to fall
+    private float swapH_offset;
+    private float swapV_offset;
+    private  boolean moving;
     TYPE type;
+
+    public boolean getMoving()
+    {
+     return swapH_offset !=0 && swapV_offset !=0 && offset !=0;
+    }
+
+    public void setSwapH_offset(float value , int width)
+    {
+        if ( value > width-1)
+            swapH_offset = width-1;
+        else if (value < 0)
+            swapH_offset = 0;
+        else
+            swapH_offset = value;
+    }
+
+    public float getSwapH_offset()
+    {
+        return  swapH_offset;}
+    public float getSwapV_offset()
+    {
+        return  swapV_offset;}
+    public void setSwapV_offset(float value , int height)
+    {
+        if ( value > height-1)
+            swapH_offset = height-1;
+        else if (value < 0)
+            swapH_offset = 0;
+        else
+            swapH_offset = value;
+    }
 
     public boolean isMoveable() {
         return moveable;
@@ -56,6 +90,8 @@ public class Poop {
     {
         this.type =type;
         offset = 0.f;
+        swapH_offset = 0.f;
+        swapV_offset = 0.f;
         switch (type)
         {
             case BASIC:

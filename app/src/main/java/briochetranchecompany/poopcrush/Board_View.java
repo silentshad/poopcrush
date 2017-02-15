@@ -17,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.lang.reflect.Array;
 
@@ -39,6 +40,7 @@ public class Board_View extends View {
     Drawable poop_png;
     Drawable[] poop_skins;
     Rect view_space;
+    long score;
 
     float offset_decrease;
     float scroll_speed = 8f; // nb of block by second or not but increasing it speed up the draw
@@ -47,6 +49,7 @@ public class Board_View extends View {
     {
 
         super(context, attrs);
+        score = 0;
         offset_decrease =0;
         nb_touched_poop = 0;
         was_touchedX = 0;
@@ -71,7 +74,6 @@ public class Board_View extends View {
 
    public void onDraw(Canvas canvas)
     {
-
         long time = System.currentTimeMillis();
 
         super.onDraw(canvas);
@@ -79,26 +81,23 @@ public class Board_View extends View {
         float block_h = game_layout.getHeight() /  (float)board.height;
         float block_w = game_layout.getWidth() /(float)board.width;
 
-        boolean redraw = false;
+
         board_full_score_check();
         board.decrease_offset( offset_decrease);
+        ( (TextView) (((View) game_layout.getParent()).findViewById(R.id.score)) ).setText(""+score);
         for (int i= 0 ; i<board.width; i++ )
         {
             for (int j= 0 ; j< board.height; j++ )
             {
                 Poop current =  board.get(i,j);
                 float offset = current.getOffset() * block_h;
+                float offsetH = current.getSwapH_offset() * block_w;
+                float offsetV = current.getSwapV_offset() * block_h;
 
-                if(offset!= 0 ) {
-
-                    redraw = true;
-                    /*Log.d(TAG, "offset : "+offset);
-                    Log.d(TAG, "offset decreased :  " + offset_decrease);*/
-                }
-                block.left =(int) (i*block_w);
-                block.top =(int) (block_h * j -  offset);
-                block.bottom = (int) (block.top + block_h);
-                block.right = (int) (block.left + block_w);
+                block.left =(int) (i*block_w) + (int)offsetH;
+                block.top =(int) (block_h * j -  offset +offsetV);
+                block.bottom = (int) (block.top + block_h );
+                block.right = (int) (block.left + block_w );
 
                 poop_png = poop_skins[ current.skin];
                 poop_png.setBounds(block);
@@ -106,15 +105,9 @@ public class Board_View extends View {
 ;            }
         }
 
-        if (redraw)
-        {
-            offset_decrease = (float) ((scroll_speed) * ( 0.001*( System.currentTimeMillis()- time)) );
-            invalidate();
-        }
-        else {
-            offset_decrease = 0;
-            board_full_score_check();
-        }
+        offset_decrease = (float) ((scroll_speed) * ( 0.001*( System.currentTimeMillis()- time)) );
+        board_full_score_check();
+        invalidate();
 
     }
 
@@ -204,21 +197,7 @@ public class Board_View extends View {
                 } 
                 else 
                 {
-                    Log.d(TAG, "reuss swap: ");
-                    long score =  board_full_score_check();
-                    Log.d(TAG, "score: " + score);
-                    if( score == 0)  {
-                        board.swapping(was_touchedX, was_touchedY, poop_touchedX, poop_touchedY);
-                        nb_touched_poop =1;
-                        was_touchedX = poop_touchedX;
-                        was_touchedY = poop_touchedY;
-                        invalidate();
-                    }
-                    // no score so redo swap
-
-                    else
                     nb_touched_poop = 0;
-
                     // swap happen so there is no selected poop
                 }
             }
@@ -230,20 +209,15 @@ public class Board_View extends View {
     public long board_full_score_check()
     {
 
-        long score = 0;
-        for (int i = 0 ; i< board.width; i++)
-        {
-            for (int j = 0; j< board.height ; j++)
-            {
-                long this_score = board.score_and_destroy(i,j);
-                if (this_score != 0)
-                {
-                    score += this_score ;
+        for (int i = 0 ; i< board.width; i++) {
+            for (int j = 0; j < board.height; j++) {
+                long this_score = board.score_and_destroy(i, j);
+                if (this_score != 0) {
+                    score += this_score;
                     board.fill();
                 }
             }
         }
-        invalidate();
         return score;
     }
 
