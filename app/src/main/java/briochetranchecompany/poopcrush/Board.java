@@ -70,8 +70,8 @@ public class Board
                 grid[x1][y1] = poop2;
                 grid[x2][y2] = poop1;
                 if (swifth_score_check(x1,y1) || swifth_score_check(x2,y2)) {
-                    poop2.setSwapV_offset((float) b, height);
-                    poop1.setSwapV_offset((float) (y2 - y1), height);
+                    poop2.setSwapV_offset((float) b);
+                    poop1.setSwapV_offset((float) (-b));
                     return true;
                 }
                 else
@@ -86,8 +86,8 @@ public class Board
                 grid[x1][y1] = poop2;
                 grid[x2][y2] = poop1;
                 if (swifth_score_check(x1,y1) || swifth_score_check(x2,y2)) {
-                    poop2.setSwapH_offset((float) a, width);
-                    poop1.setSwapH_offset((float) (x2 - x1), width);
+                    poop2.setSwapH_offset((float) a);
+                    poop1.setSwapH_offset((float) (-a));
                     return true;
                 }
                 else {
@@ -305,8 +305,8 @@ public class Board
             {
                 Poop current = get(i,j);
                 current.setOffset( current.getOffset() - decrease);
-                current.setSwapV_offset( current.getSwapV_offset() - decrease , height);
-                current.setSwapH_offset( current.getSwapH_offset() - decrease , width);
+                current.setSwapV_offset( current.getSwapV_offset() - decrease/10);
+                current.setSwapH_offset( current.getSwapH_offset() - decrease/10);
             }
         }
     }

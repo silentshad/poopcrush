@@ -34,12 +34,12 @@ public class Poop {
      return swapH_offset !=0 && swapV_offset !=0 && offset !=0;
     }
 
-    public void setSwapH_offset(float value , int width)
+    public void setSwapH_offset(float value )
     {
-        if ( value > width-1)
-            swapH_offset = width-1;
-        else if (value < 0)
-            swapH_offset = 0;
+        if ( value > 1)
+            swapH_offset = 1;
+        else if (value < -1)
+            swapH_offset = -1;
         else
             swapH_offset = value;
     }
@@ -50,12 +50,12 @@ public class Poop {
     public float getSwapV_offset()
     {
         return  swapV_offset;}
-    public void setSwapV_offset(float value , int height)
+    public void setSwapV_offset(float value )
     {
-        if ( value > height-1)
-            swapH_offset = height-1;
-        else if (value < 0)
-            swapH_offset = 0;
+        if ( value > 1)
+            swapH_offset = 1;
+        else if (value < -1)
+            swapH_offset = -1;
         else
             swapH_offset = value;
     }
