@@ -44,7 +44,7 @@ public class Board_View extends View {
     long time;
 
     float offset_decrease;
-    float scroll_speed = 2f; // nb of block by second or not but increasing it speed up the draw
+    float scroll_speed = 1f; // nb of block by second or not but increasing it speed up the draw
 
     public Board_View(Context context , AttributeSet attrs)
     {
@@ -71,6 +71,7 @@ public class Board_View extends View {
         }
         poop_skin_xml.recycle();
 
+        board.grid[2][2] = new Poop(Poop.TYPE.NONE);
         invalidate();
     }
 
@@ -85,29 +86,30 @@ public class Board_View extends View {
 
 
         board_full_score_check();
+        board.fall();
+        board.fill();
         board.decrease_offset( offset_decrease);
         ( (TextView) (((View) game_layout.getParent()).findViewById(R.id.score)) ).setText(""+score);
-        for (int i= 0 ; i<board.width; i++ )
-        {
-            for (int j= 0 ; j< board.height; j++ )
-            {
-                Poop current =  board.get(i,j);
+        for (int i= 0 ; i<board.width; i++ ) {
+            for (int j = 0; j < board.height; j++) {
+                Poop current = board.get(i, j);
                 float offset = current.getOffset() * block_h;
                 float offsetH = current.getSwapH_offset() * block_w;
                 float offsetV = current.getSwapV_offset() * block_h;
 
-                if ((offsetH!=0 || offsetV!=0))
-                Log.d(TAG, "SUCE!!!!!!!!!!!!!!!" + offsetH/block_w);
+                block.left = (int) (i * block_w) + (int) offsetH;
+                block.top = (int) (block_h * j - offset + offsetV);
+                block.bottom = (int) (block.top + block_h);
+                block.right = (int) (block.left + block_w);
 
-                block.left =(int) (i*block_w) + (int)offsetH;
-                block.top =(int) (block_h * j -  offset +offsetV);
-                block.bottom = (int) (block.top + block_h );
-                block.right = (int) (block.left + block_w );
 
-                poop_png = poop_skins[ current.skin];
-                poop_png.setBounds(block);
-                poop_png.draw(canvas);
-;            }
+                if (current.type != Poop.TYPE.NONE)
+                {
+                    poop_png = poop_skins[current.skin];
+                    poop_png.setBounds(block);
+                    poop_png.draw(canvas);
+                }
+            }
         }
 
         offset_decrease = (float) ((scroll_speed) * ( 0.001*( System.currentTimeMillis()- time)) );
@@ -216,12 +218,11 @@ public class Board_View extends View {
 
         for (int i = 0 ; i< board.width; i++) {
             for (int j = 0; j < board.height; j++) {
-                if (!board.get(i,j).IsMoving()) {
+                if (!board.get(i,j).IsMoving() && board.get(i,j).type != Poop.TYPE.NONE) {
                     long this_score = board.score_and_destroy(i, j);
                     if (this_score != 0) {
                         score += this_score;
-                        board.fall();
-                        board.fill();
+
                     }
                 }
             }
