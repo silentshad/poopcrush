@@ -24,66 +24,11 @@ public class Poop {
     public boolean gravity; // if the poop can fall
     private  boolean moveable; // can be moved
     private float offset; // number of poop.height  the block need to fall
-    private float swapH_offset;
-    private float swapV_offset;
-    private  boolean moving;
+    private float swapH_offset;// number of block to travel during horizontal swap
+    private float swapV_offset; //number of block to travel during horizontal swap
+
     TYPE type;
 
-    public boolean getMoving()
-    {
-     return swapH_offset !=0 && swapV_offset !=0 && offset !=0;
-    }
-
-    public void setSwapH_offset(float value )
-    {
-        if ( value > 1)
-            swapH_offset = 1;
-        else if (value < -1)
-            swapH_offset = -1;
-        else
-            swapH_offset = value;
-    }
-
-    public float getSwapH_offset()
-    {
-        return  swapH_offset;}
-    public float getSwapV_offset()
-    {
-        return  swapV_offset;}
-    public void setSwapV_offset(float value )
-    {
-        if ( value > 1)
-            swapH_offset = 1;
-        else if (value < -1)
-            swapH_offset = -1;
-        else
-            swapH_offset = value;
-    }
-
-    public boolean isMoveable() {
-        return moveable;
-    }
-
-    public long getPoint() {
-        return point;
-    }
-
-
-    public int getLife() {
-        return life;
-    }
-
-    public void setLife(int life) {
-        this.life = life >=0 ? life  : 0;
-    }
-
-    public float getOffset() {
-        return offset;
-    }
-
-    public void setOffset(float offset) {
-        this.offset = offset<0 ? 0 : offset;
-    }
 
 
     public Poop( TYPE type)
@@ -119,6 +64,63 @@ public class Poop {
 
         }
 
+    }
+
+
+    public boolean IsMoving()
+    {
+        return swapH_offset !=0 || swapV_offset !=0 || offset !=0;
+    }
+
+    public void setSwapH_offset(float value )
+    {
+        if ( value > 1)
+            swapH_offset = 1;
+        else if (value < -1)
+            swapH_offset = -1;
+        else
+            swapH_offset = value;
+    }
+
+    public float getSwapH_offset()
+    {
+        return  swapH_offset;}
+    public float getSwapV_offset()
+    {
+        return  swapV_offset;}
+    public void setSwapV_offset(float value )
+    {
+        if ( value > 1)
+            swapV_offset = 1;
+        else if (value < -1)
+            swapV_offset = -1;
+        else
+            swapV_offset = value;
+    }
+
+    public boolean isMovable() {
+        return moveable;
+    }
+
+    public long getPoint() {
+        return point;
+    }
+
+
+    public int getLife() {
+        return life;
+    }
+
+    public void setLife(int life) {
+        this.life = (life >=0 ? life  : 0);
+    }
+
+    public float getOffset() {
+        return offset;
+    }
+
+    public void setOffset(float offset) {
+        this.offset = offset<0 ? 0 : offset;
     }
 
   }

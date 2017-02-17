@@ -41,9 +41,10 @@ public class Board_View extends View {
     Drawable[] poop_skins;
     Rect view_space;
     long score;
+    long time;
 
     float offset_decrease;
-    float scroll_speed = 8f; // nb of block by second or not but increasing it speed up the draw
+    float scroll_speed = 2f; // nb of block by second or not but increasing it speed up the draw
 
     public Board_View(Context context , AttributeSet attrs)
     {
@@ -60,6 +61,7 @@ public class Board_View extends View {
         Resources res = getResources();
         TypedArray poop_skin_xml =  res.obtainTypedArray(R.array.poop_skins);
         int count_skin = poop_skin_xml.length();
+        time =0;
 
 
         poop_skins = new Drawable[count_skin];
@@ -74,7 +76,7 @@ public class Board_View extends View {
 
    public void onDraw(Canvas canvas)
     {
-        long time = System.currentTimeMillis();
+
 
         super.onDraw(canvas);
         View game_layout =   findViewById(R.id.board_view);
@@ -94,6 +96,9 @@ public class Board_View extends View {
                 float offsetH = current.getSwapH_offset() * block_w;
                 float offsetV = current.getSwapV_offset() * block_h;
 
+                if ((offsetH!=0 || offsetV!=0))
+                Log.d(TAG, "SUCE!!!!!!!!!!!!!!!" + offsetH/block_w);
+
                 block.left =(int) (i*block_w) + (int)offsetH;
                 block.top =(int) (block_h * j -  offset +offsetV);
                 block.bottom = (int) (block.top + block_h );
@@ -106,7 +111,7 @@ public class Board_View extends View {
         }
 
         offset_decrease = (float) ((scroll_speed) * ( 0.001*( System.currentTimeMillis()- time)) );
-        board_full_score_check();
+        time = System.currentTimeMillis();
         invalidate();
 
     }
@@ -211,10 +216,13 @@ public class Board_View extends View {
 
         for (int i = 0 ; i< board.width; i++) {
             for (int j = 0; j < board.height; j++) {
-                long this_score = board.score_and_destroy(i, j);
-                if (this_score != 0) {
-                    score += this_score;
-                    board.fill();
+                if (!board.get(i,j).IsMoving()) {
+                    long this_score = board.score_and_destroy(i, j);
+                    if (this_score != 0) {
+                        score += this_score;
+                        board.fall();
+                        board.fill();
+                    }
                 }
             }
         }

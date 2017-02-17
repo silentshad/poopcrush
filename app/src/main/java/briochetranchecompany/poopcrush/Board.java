@@ -1,21 +1,17 @@
 package briochetranchecompany.poopcrush;
 
-import android.content.res.Resources;
-import android.graphics.BitmapFactory;
+import android.nfc.Tag;
 import android.util.Log;
 import android.util.Pair;
 
-import junit.framework.Assert;
-
 import java.util.ArrayList;
 import java.util.Random;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by silentshad on 01/02/17.
  */
 
+import static android.content.ContentValues.TAG;
 public class Board
 {
 
@@ -60,18 +56,18 @@ public class Board
         Poop poop2 = grid[x2][y2];
 
 
-        if ( poop1.isMoveable() && poop2.isMoveable() && !poop1.getMoving() && !poop2.getMoving())
+        if ( poop1.isMovable() && poop2.isMovable() && !poop1.IsMoving() && !poop2.IsMoving())
         {
             int a = x1-x2;
             int b = y1-y2;
 
-            if( (Math.abs(a) == 1 && b==0) ) // vertical swap
+            if( (Math.abs(a) == 1 && b==0) ) // horrizontal swap
             {
                 grid[x1][y1] = poop2;
                 grid[x2][y2] = poop1;
                 if (swifth_score_check(x1,y1) || swifth_score_check(x2,y2)) {
-                    poop2.setSwapV_offset((float) b);
-                    poop1.setSwapV_offset((float) (-b));
+                    poop2.setSwapH_offset((float) -a);
+                    poop1.setSwapH_offset((float) a);
                     return true;
                 }
                 else
@@ -81,13 +77,13 @@ public class Board
                     return  false;
                 }
             }
-            else if (Math.abs(b) == 1 && a==0) // horizontal swap
+            else if (Math.abs(b) == 1 && a==0) // vertical swap
             {
                 grid[x1][y1] = poop2;
                 grid[x2][y2] = poop1;
                 if (swifth_score_check(x1,y1) || swifth_score_check(x2,y2)) {
-                    poop2.setSwapH_offset((float) a);
-                    poop1.setSwapH_offset((float) (-a));
+                    poop2.setSwapV_offset((float) -b);
+                    poop1.setSwapV_offset((float) b);
                     return true;
                 }
                 else {
@@ -107,18 +103,20 @@ public class Board
         return grid[x][y];
     }
 
+
+
     public void get_neighbourH(int x, int y, ArrayList<Pair<Integer,Integer>> L) // add  unvisited neighbour to L
     {
         Poop poop = get(x, y);
 
         int i = 1; // line to the left
-        while (isvalid(x - i, y)  && grid[x - i][y].skin == poop.skin && !get(x-i,y).getMoving()) {
+        while (isvalid(x - i, y)  && grid[x - i][y].skin == poop.skin && !get(x-i,y).IsMoving()) {
             L.add(new Pair<>(x - i, y));
             i++;
         }
 
         i = 1; // line to the right;
-        while (isvalid(x + i, y)  && grid[x + i][y].skin == poop.skin && !get(x+i,y).getMoving())
+        while (isvalid(x + i, y)  && grid[x + i][y].skin == poop.skin && !get(x+i,y).IsMoving())
         {
             L.add(new Pair<>(x + i, y));
             i++;
@@ -129,14 +127,14 @@ public class Board
         Poop poop = get(x, y);
 
         int i = 1; // line to the top
-        while(  isvalid(x,y-i) && grid[x][y-i].skin == poop.skin  && !get(x,y-i).getMoving())
+        while(  isvalid(x,y-i) && grid[x][y-i].skin == poop.skin  && !get(x,y-i).IsMoving())
         {
             L.add(new Pair<>(x, y-i));
             i++;
         }
 
         i = 1; // to the bottom
-        while(  isvalid(x,y+i) && grid[x][y+i].skin == poop.skin && !get(x,y+i).getMoving())
+        while(  isvalid(x,y+i) && grid[x][y+i].skin == poop.skin && !get(x,y+i).IsMoving())
         {
             L.add(new Pair<>(x, y+i));
             i++;
@@ -224,43 +222,29 @@ public class Board
         grid[x][y] = poop ;
     }
 
-    public Pair<Integer,Integer> empty_check()
-    {
-       Pair<Integer,Integer>  empty_poop = null;
-        boolean found = false;
 
-        int  i = width -1;
-
-       while( i>= 0 && !found )
-        {
-            int j = height -1;
-            while(j>= 0 && !found )
-            {
-
-                //Log.d(TAG, "empty_check: " +j);
-                if( get(i,j).type == Poop.TYPE.EMPTY)
-                {
-                    found = true;
-                    empty_poop = new  Pair<>(i,j);
-                }
-
-                j--;
-            }
-
-            i--;
-        }
-        return empty_poop;
-    }
-
-    public void fall(int x, int y ,int count)
+    public void fall()
     // y is where the first poop needs to fall by count block
 
     {
-        if (y >= 0)
-        {
-            for (int j = y; j >= 0; j--) {
-                grid[x][j + count] = grid[x][j];
-                get(x, j + count).setOffset(count);
+
+        for (int i = width-1; i>=0 ; i--) {
+            float empty = 0.f;
+            for (int j = height - 1; j >= 0; j--) {
+
+                while (j>=0 && get(i,j).type == Poop.TYPE.EMPTY) {
+                    empty++;
+                    j--;
+                }
+                while (empty!=0 && j>=0 && get(i,j).gravity) {
+                    Poop current = get(i,j);
+                    current.setOffset(empty);
+
+                    grid[i][j] = get(i,j+(int)empty);
+                    grid[i][j+(int)empty] = current;
+
+                    j--;
+                }
 
             }
         }
@@ -268,33 +252,20 @@ public class Board
 
     public void  fill()
     {
-        boolean full = false;
-        while (!full)
+        for (int i =0 ; i < width ;i++)
         {
-            Pair<Integer,Integer>  current = empty_check() ;
-            if (current != null )
-            {
-                int j = current.second ;
-                int count = 0;
-                // count the number of empty block above the current one
-                while (j >=0 && get(current.first,j).type == Poop.TYPE.EMPTY )
-                {
-                    count++;
-                    j--;
-                }
-                fall(current.first, j, count);
-
-                j = 0 ;
-                while (j < height && get(current.first,j).type == Poop.TYPE.EMPTY )
-                {
-                    defecate( current.first, j , count);
-                    j++;
-                }
+             float empty =0;
+             int j = 0 ;
+             while (j < height && get(i,j).type == Poop.TYPE.EMPTY) {
+                 empty++;
+                 j++;
+             }
+            j =( j == height? height-1 : j);
+            if( empty != 0) {
+                for (int w = j; w >= 0; w--)
+                    defecate(i, w, empty);
             }
-            else
-                full = true;
         }
-
     }
 
     public  void decrease_offset( float decrease)
@@ -305,8 +276,23 @@ public class Board
             {
                 Poop current = get(i,j);
                 current.setOffset( current.getOffset() - decrease);
-                current.setSwapV_offset( current.getSwapV_offset() - decrease/10);
-                current.setSwapH_offset( current.getSwapH_offset() - decrease/10);
+
+                float offsetV = current.getSwapV_offset();
+                float offsetH = current.getSwapH_offset();
+
+                if (offsetH > 0)
+                    offsetH = (offsetH-decrease <0 ? 0 : offsetH-decrease);
+                else
+                    offsetH = ( offsetH+decrease >0 ? 0 : offsetH+decrease);
+
+                if(offsetV > 0)
+                    offsetV = ( offsetV-decrease <0 ? 0 : offsetV-decrease);
+                else
+                    offsetV = ( offsetV+decrease >0 ? 0 : offsetV+decrease);
+
+                current.setSwapV_offset(offsetV);
+                current.setSwapH_offset(offsetH);
+
             }
         }
     }
