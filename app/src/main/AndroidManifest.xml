@@ -12,12 +12,13 @@
             android:name=".Poop_Crush"
             android:label="PoopCrush"
             android:screenOrientation="portrait">
-
+        </activity>
+        <activity android:name=".Menu_activity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
     </application>
 
