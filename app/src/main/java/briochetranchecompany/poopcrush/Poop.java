@@ -71,6 +71,10 @@ public class Poop {
     {
         return swapH_offset !=0 || swapV_offset !=0 || offset !=0;
     }
+    public boolean IsFalling()
+    {
+        return swapH_offset >0.1 || swapV_offset >0.1 || offset >0.1;
+    }
 
     public void setSwapH_offset(float value )
     {

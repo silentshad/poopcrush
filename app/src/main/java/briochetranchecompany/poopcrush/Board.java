@@ -35,9 +35,9 @@ public class Board
             for (int j = 0; j<height; j++)
             {
 
-                Poop poop = new Poop(Poop.TYPE.BASIC);
+                Poop poop = new Poop(Poop.TYPE.EMPTY);
                 // give the skin
-                poop.skin = rand.nextInt(poop_count-1);
+                poop.skin = poop_count-1;
                 grid[i][j] = poop ;
 
             }
@@ -159,30 +159,25 @@ public class Board
         long score = 0;
 
 
-        if ( sizeH>= thresh-1 ||  sizeV>= thresh-1)
-        {
+        if ( sizeH>= thresh-1 ||  sizeV>= thresh-1) {
             Poop first = new Poop(Poop.TYPE.EMPTY);
-            score += get(x,y).getPoint();
+            score += get(x, y).getPoint();
             first.skin = poop_count - 1;
             grid[x][y] = first;
 
 
-            if (sizeH >= thresh - 1)
-            {
-                for (Pair<Integer, Integer> p : neigh_listH)
-                {
-                    score += get(p.first,p.second).getPoint();
+            if (sizeH >= thresh - 1) {
+                for (Pair<Integer, Integer> p : neigh_listH) {
+                    score += get(p.first, p.second).getPoint();
                     Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
                     temp_poop.skin = poop_count - 1;
                     grid[p.first][p.second] = temp_poop;
 
                 }
             }
-            if (sizeV >= thresh - 1)
-            {
-                for (Pair<Integer, Integer> p : neigh_listV)
-                {
-                    score += get(p.first,p.second).getPoint();
+            if (sizeV >= thresh - 1) {
+                for (Pair<Integer, Integer> p : neigh_listV) {
+                    score += get(p.first, p.second).getPoint();
                     Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
                     temp_poop.skin = poop_count - 1;
                     grid[p.first][p.second] = temp_poop;
@@ -190,9 +185,7 @@ public class Board
 
 
             }
-            return score;
         }
-        else
             return score;
 
     }
@@ -229,51 +222,48 @@ public class Board
         for (int i = 0; i<width; i++) {
             for (int j = 0 ; j < height; j++) {
 
-                if (get(i,j).gravity)
+                if (get(i,j).gravity && !get(i,j).IsFalling())
                 {
-                    Poop temp;
+                    Poop current = get(i, j);
+                    Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
+                    temp_poop.skin = poop_count - 1;
+
                     if ( isvalid(i,j+1)&&get(i,j+1).type == Poop.TYPE.EMPTY)
                     {
-
-                        temp = get(i, j);
-                        temp.setOffset(1);
-                        grid[i][j] = get(i, j + 1);
-                        grid[i][j + 1] = temp;
+                        current.setOffset(1);
+                        grid[i][j] = temp_poop;
+                        grid[i][j + 1] = current;
                     }
                     else if ((isvalid(i + 1, j) && get(i + 1, j).type == Poop.TYPE.NONE) && (isvalid(i+1, j + 1) && get(i+1, j + 1).type == Poop.TYPE.EMPTY))
-                    {// a none to the right and below none is an empty
-                        temp = get(i, j);
-                        temp.setSwapH_offset(1);
-                        temp.setOffset(1);
-                        grid[i][j] = get(i+1, j + 1);
-                        grid[i+1][j + 1] = temp;
+                    {// a none to the right and below the none is an empty
+                        current.setSwapH_offset(-1);
+                        current.setOffset(1);
+                        grid[i][j] = temp_poop;
+                        grid[i+1][j+1] = current;
                     }
 
                     else if ((isvalid(i - 1, j) && get(i - 1, j).type == Poop.TYPE.NONE) && (isvalid(i-1, j + 1) && get(i-1, j + 1).type == Poop.TYPE.EMPTY))
-                    {// a none to the left and below none is an empty
-                        temp = get(i, j);
-                        temp.setSwapH_offset(-1);
-                        temp.setOffset(1);
-                        grid[i][j] = get(i-1, j + 1);
-                        grid[i - 1][j + 1] = temp;
+                    {// a none to the left and below the none is an empty
+                        current.setSwapH_offset(1);
+                        current.setOffset(1);
+                        grid[i][j] =temp_poop;
+                        grid[i - 1][j + 1] = current;
                     }
                     else if (isvalid(i, j + 1) && get(i, j + 1).type == Poop.TYPE.NONE) //there is a none below
                     {
                         if (isvalid(i - 1, j) && get(i - 1, j).type == Poop.TYPE.EMPTY && isvalid(i - 1, j + 1) && get(i - 1, j + 1).type == Poop.TYPE.EMPTY)
                         {//fall diagonally to the left
-                            temp = get(i, j);
-                            temp.setSwapH_offset(1);
-                            temp.setOffset(1);
-                            grid[i][j] = get(i - 1, j + 1);
-                            grid[i - 1][j + 1] = temp;
+                            current.setSwapH_offset(1);
+                            current.setOffset(1);
+                            grid[i][j] = temp_poop;
+                            grid[i - 1][j + 1] = current;
                         }
                         else if (isvalid(i + 1, j) && get(i + 1, j).type == Poop.TYPE.EMPTY && isvalid(i + 1, j + 1) && get(i + 1, j + 1).type == Poop.TYPE.EMPTY)
                         {//fall diagonally to the right
-                            temp = get(i, j);
-                            temp.setSwapH_offset(-1);
-                            temp.setOffset(1);
-                            grid[i][j] = get(i + 1, j + 1);
-                            grid[i + 1][j + 1] = temp;
+                            current.setSwapH_offset(-1);
+                            current.setOffset(1);
+                            grid[i][j] = temp_poop;
+                            grid[i + 1][j + 1] = current;
                         }
                     }
 

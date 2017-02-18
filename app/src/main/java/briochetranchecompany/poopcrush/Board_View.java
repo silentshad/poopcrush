@@ -42,9 +42,10 @@ public class Board_View extends View {
     Rect view_space;
     long score;
     long time;
+    boolean animmation_in_progress;
 
     float offset_decrease;
-    float scroll_speed = 1f; // nb of block by second or not but increasing it speed up the draw
+    float scroll_speed = 2f; // nb of block by second or not but increasing it speed up the draw
 
     public Board_View(Context context , AttributeSet attrs)
     {
@@ -58,6 +59,8 @@ public class Board_View extends View {
         board = new Board();
         block = new Rect();
         view_space = new Rect();
+        animmation_in_progress=false;
+
         Resources res = getResources();
         TypedArray poop_skin_xml =  res.obtainTypedArray(R.array.poop_skins);
         int count_skin = poop_skin_xml.length();
@@ -75,21 +78,24 @@ public class Board_View extends View {
         invalidate();
     }
 
-   public void onDraw(Canvas canvas)
-    {
+   public void onDraw(Canvas canvas) {
 
 
-        super.onDraw(canvas);
-        View game_layout =   findViewById(R.id.board_view);
-        float block_h = game_layout.getHeight() /  (float)board.height;
-        float block_w = game_layout.getWidth() /(float)board.width;
+       super.onDraw(canvas);
+       View game_layout = findViewById(R.id.board_view);
+       float block_h = game_layout.getHeight() / (float) board.height;
+       float block_w = game_layout.getWidth() / (float) board.width;
 
 
-        board_full_score_check();
-        board.fall();
-        board.fill();
+       board_full_score_check();
+       board.fall();
+       board.fill();
+
         board.decrease_offset( offset_decrease);
-        ( (TextView) (((View) game_layout.getParent()).findViewById(R.id.score)) ).setText(""+score);
+        ( (TextView) (((View) game_layout.getParent()).findViewById(R.id.score)) ).setText(score+"000000");
+
+       boolean one_moving = false;
+
         for (int i= 0 ; i<board.width; i++ ) {
             for (int j = 0; j < board.height; j++) {
                 Poop current = board.get(i, j);
@@ -102,6 +108,8 @@ public class Board_View extends View {
                 block.bottom = (int) (block.top + block_h);
                 block.right = (int) (block.left + block_w);
 
+                if (current.IsMoving())
+                    one_moving = true;
 
                 if (current.type != Poop.TYPE.NONE)
                 {
@@ -111,6 +119,8 @@ public class Board_View extends View {
                 }
             }
         }
+
+       animmation_in_progress = one_moving;
 
         offset_decrease = (float) ((scroll_speed) * ( 0.001*( System.currentTimeMillis()- time)) );
         time = System.currentTimeMillis();
