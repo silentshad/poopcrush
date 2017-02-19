@@ -3,26 +3,16 @@ package briochetranchecompany.poopcrush;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.util.EventLog;
 import android.util.Log;
-import android.util.Pair;
 import android.view.MotionEvent;
-import android.view.SurfaceView;
 import android.view.View;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import java.lang.reflect.Array;
-
 import static android.content.ContentValues.TAG;
-import static android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE;
 
 
 /**
@@ -42,7 +32,7 @@ public class Board_View extends View {
     Rect view_space;
     long score;
     long time;
-    boolean animmation_in_progress;
+    boolean animation_in_progress;
 
     float offset_decrease;
     float scroll_speed = 2f; // nb of block by second or not but increasing it speed up the draw
@@ -59,7 +49,7 @@ public class Board_View extends View {
         board = new Board();
         block = new Rect();
         view_space = new Rect();
-        animmation_in_progress=false;
+        animation_in_progress =false;
 
         Resources res = getResources();
         TypedArray poop_skin_xml =  res.obtainTypedArray(R.array.poop_skins);
@@ -92,7 +82,7 @@ public class Board_View extends View {
        board.fill();
 
         board.decrease_offset( offset_decrease);
-        ( (TextView) (((View) game_layout.getParent()).findViewById(R.id.score)) ).setText(score+"000000");
+        ( (TextView) (((View) game_layout.getParent()).findViewById(R.id.score)) ).setText(score+"");
 
        boolean one_moving = false;
 
@@ -120,7 +110,7 @@ public class Board_View extends View {
             }
         }
 
-       animmation_in_progress = one_moving;
+       animation_in_progress = one_moving;
 
         offset_decrease = (float) ((scroll_speed) * ( 0.001*( System.currentTimeMillis()- time)) );
         time = System.currentTimeMillis();
@@ -186,7 +176,7 @@ public class Board_View extends View {
         int poop_touchedX = x/ (view_space.width()/board.width)  ;
         int poop_touchedY = y/ (view_space.height()/board.height);
 
-        Log.d(TAG, "touched poop" + poop_touchedX+"|" +poop_touchedY);
+        //Log.d(TAG, "touched poop" + poop_touchedX+"|" +poop_touchedY);
 
 
         if ( board.isvalid(poop_touchedX, poop_touchedY)  && nb_touched_poop < 2
@@ -228,7 +218,7 @@ public class Board_View extends View {
 
         for (int i = 0 ; i< board.width; i++) {
             for (int j = 0; j < board.height; j++) {
-                if (!board.get(i,j).IsMoving() && board.get(i,j).type != Poop.TYPE.NONE) {
+                if (!board.get(i,j).IsMoving() && board.get(i,j).type != Poop.TYPE.NONE && board.get(i,j).type != Poop.TYPE.EMPTY) {
                     long this_score = board.score_and_destroy(i, j);
                     if (this_score != 0) {
                         score += this_score;

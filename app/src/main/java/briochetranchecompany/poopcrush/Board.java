@@ -105,69 +105,60 @@ public class Board
 
 
 
-    public void get_neighbourH(int x, int y, ArrayList<Pair<Integer,Integer>> L) // add  unvisited neighbour to L
+    public boolean get_neighbour(int x, int y, ArrayList<Pair<Integer,Integer>> L) // add  unvisited neighbour to L
     {
         Poop poop = get(x, y);
+        int sameH = 0;
 
-        int i = 1; // line to the left
-        while ( isvalid(x - i, y)  && get(x-i,y).type!= Poop.TYPE.NONE &&  grid[x - i][y].skin == poop.skin && !get(x-i,y).IsMoving() ) {
-            L.add(new Pair<>(x - i, y));
+        int i = 0; // line to the right;
+        while (isvalid(x + i, y)&& get(x+i,y).type!= Poop.TYPE.NONE  && grid[x + i][y].skin == poop.skin && !get(x+i,y).IsMoving()) {
+
+            int sameV_above = 0;
+            int sameV_below = 0;
+
+            int j = 1; // line to the top
+            while (isvalid(x, y - j) && get(x, y - j).type != Poop.TYPE.NONE && grid[x][y - j].skin == poop.skin && !get(x, y - j).IsMoving()) {
+                sameV_above++;
+                j++;
+            }
+            j = 1; // to the bottom
+            while (isvalid(x, y + j) && get(x, y + j).type != Poop.TYPE.NONE && grid[x][y + j].skin == poop.skin && !get(x, y + j).IsMoving()) {
+                sameV_below++;
+                j++;
+            }
+
+            if( sameV_above+sameV_below >= thresh-1)
+            {
+                for (int k= y+ sameV_below ; k>=y- sameV_above ; k--)
+                    L.add(new Pair<>(x, k));
+            }
+
+            sameH++;
             i++;
         }
 
-        i = 1; // line to the right;
-        while (isvalid(x + i, y)&& get(x+i,y).type!= Poop.TYPE.NONE  && grid[x + i][y].skin == poop.skin && !get(x+i,y).IsMoving())
+        if( sameH >= thresh)
         {
-            L.add(new Pair<>(x + i, y));
-            i++;
-        }
-    }
-    public void get_neighbourV(int x, int y, ArrayList<Pair<Integer,Integer>> L) // add  unvisited neighbour to L
-    {
-        Poop poop = get(x, y);
-
-        int i = 1; // line to the top
-        while(  isvalid(x,y-i)&& get(x,y-i).type!= Poop.TYPE.NONE && grid[x][y-i].skin == poop.skin  && !get(x,y-i).IsMoving())
-        {
-            L.add(new Pair<>(x, y-i));
-            i++;
+            for (int k = 0 ; k < sameH ; k++)
+                L.add(new Pair<>(x+k, y));
         }
 
-        i = 1; // to the bottom
-        while(  isvalid(x,y+i)&& get(x,y+i).type!= Poop.TYPE.NONE && grid[x][y+i].skin == poop.skin && !get(x,y+i).IsMoving())
-        {
-            L.add(new Pair<>(x, y+i));
-            i++;
-        }
+        return L.size() >= thresh;
 
     }
 
     public long score_and_destroy(int x, int y) // return 0 if not enough poop are touching
     {
-        ArrayList<Pair<Integer,Integer>> neigh_listH = new ArrayList<>();
-        ArrayList<Pair<Integer,Integer>> neigh_listV = new ArrayList<>();
+        ArrayList<Pair<Integer,Integer>> neigh_list = new ArrayList<>();
 
-        get_neighbourH(x, y, neigh_listH);
-        get_neighbourV(x, y, neigh_listV);
 
-        int  sizeH = neigh_listH.size();
-        int  sizeV = neigh_listV.size();
-
-        //Log.d(TAG, "score_pointH: " + sizeH);
-       // Log.d(TAG, "score_pointV: " + sizeV);
+        boolean point_scored =get_neighbour(x, y, neigh_list);
 
         long score = 0;
 
 
-        if ( sizeH>= thresh-1 ||  sizeV>= thresh-1) {
-            Poop first = new Poop(Poop.TYPE.EMPTY);
-            score += get(x, y).getPoint();
-            first.skin = poop_count - 1;
-            grid[x][y] = first;
-
-
-            if (sizeH >= thresh - 1) {
-                for (Pair<Integer, Integer> p : neigh_listH) {
+            if (point_scored) {
+                for (Pair<Integer, Integer> p : neigh_list) {
                     score += get(p.first, p.second).getPoint();
                     Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
                     temp_poop.skin = poop_count - 1;
@@ -175,35 +166,16 @@ public class Board
 
                 }
             }
-            if (sizeV >= thresh - 1) {
-                for (Pair<Integer, Integer> p : neigh_listV) {
-                    score += get(p.first, p.second).getPoint();
-                    Poop temp_poop = new Poop(Poop.TYPE.EMPTY);
-                    temp_poop.skin = poop_count - 1;
-                    grid[p.first][p.second] = temp_poop;
-                }
-
-
-            }
-        }
             return score;
 
     }
 
     public boolean swifth_score_check (int x, int y)
     {
-         ArrayList<Pair<Integer,Integer>> neigh_listH = new ArrayList<>();
-        ArrayList<Pair<Integer,Integer>> neigh_listV = new ArrayList<>();
+         ArrayList<Pair<Integer,Integer>> neigh_list = new ArrayList<>();
 
-        get_neighbourH(x, y, neigh_listH);
-        get_neighbourV(x, y, neigh_listV);
+        return get_neighbour(x, y, neigh_list);
 
-        int  sizeH = neigh_listH.size();
-        int  sizeV = neigh_listV.size();
-
-        //Log.d(TAG, "swifth_score_check: " + (sizeH > thresh-1 || sizeV > thresh-1) );
-
-        return sizeH >= thresh-1 || sizeV >= thresh-1;
     }
 
     public void defecate(int x, int y, float offset)
