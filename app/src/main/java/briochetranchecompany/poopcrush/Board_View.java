@@ -32,8 +32,8 @@ public class Board_View extends View {
     Drawable[] poop_skins;
     Rect view_space;
     long score;
-    float time;
-    float time_since_played;
+    long time;
+    double time_since_played;
 
     boolean animation_in_progress;
     boolean game_paused;
@@ -45,6 +45,7 @@ public class Board_View extends View {
     {
 
         super(context, attrs);
+        time= System.currentTimeMillis();
         time_since_played=0;
         score = 0;
         offset_decrease =0;
@@ -60,7 +61,6 @@ public class Board_View extends View {
         Resources res = getResources();
         TypedArray poop_skin_xml =  res.obtainTypedArray(R.array.poop_skins);
         int count_skin = poop_skin_xml.length();
-        time =0;
 
 
         poop_skins = new Drawable[count_skin];
@@ -71,6 +71,9 @@ public class Board_View extends View {
         poop_skin_xml.recycle();
 
         board.grid[2][2] = new Poop(Poop.TYPE.NONE);
+        board.grid[1][2] = new Poop(Poop.TYPE.NONE);
+        board.grid[3][2] = new Poop(Poop.TYPE.NONE);
+
         invalidate();
     }
 
@@ -85,6 +88,8 @@ public class Board_View extends View {
 
        if (!game_paused) {
            board_full_score_check();
+           board.fall();
+           board.fill();
 
            board.decrease_offset(offset_decrease);
            ((TextView) (((View) game_layout.getParent()).findViewById(R.id.score))).setText(score + "");
@@ -115,24 +120,31 @@ public class Board_View extends View {
            }
 
            animation_in_progress = one_moving;
-           update_time(0.001f * (System.currentTimeMillis() - time));
+           if (animation_in_progress)
+               time_since_played=0;
+
+           update_time((0.001 * ((System.currentTimeMillis()) - time))  );
+           Log.d(TAG, "time since played  " + time_since_played);
            if (!animation_in_progress && time_since_played > 5f) {
-               Log.d(TAG, "time since played" + time_since_played);
-               if (!board.possible_move()) {
+               Log.d(TAG, "yolo");
+               boolean debug = board.possible_move();
+               Log.d(TAG, "show debug" + debug);
+               if (!debug) {
                    game_paused = true;
                    (((View)(game_layout.getParent())).findViewById(R.id.loosing_screen)).setVisibility(View.VISIBLE);
                }
            }
        }
+       time = System.currentTimeMillis();
         invalidate();
 
     }
 
-    private void update_time(float time_since_lastFrame)
+    private void update_time(double time_since_lastFrame)
     { // time since last frame is in seconds
-        offset_decrease =  scroll_speed * time_since_lastFrame ;
+        Log.d(TAG, "update_time: " + time_since_lastFrame);
+        offset_decrease =  (float)(scroll_speed * time_since_lastFrame );
         time_since_played += time_since_lastFrame;
-        time = System.currentTimeMillis();
     }
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
     {
@@ -240,11 +252,8 @@ public class Board_View extends View {
                         score += this_score;
                     }
                 }
-                time_since_played =0;
             }
         }
-        board.fall();
-        board.fill();
         return score;
     }
 

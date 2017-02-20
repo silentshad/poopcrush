@@ -45,6 +45,7 @@
         android:layout_below="@id/textView"
         android:id="@+id/score" />
 
+
     <RelativeLayout
         android:id="@+id/loosing_screen"
         android:layout_width="wrap_content"
@@ -54,6 +55,8 @@
         android:layout_below="@id/score"
         android:background= "#FFFFFF"
         android:visibility="invisible">
+        <!--android:gravity="top" -->
+
 
         <TextView
             android:layout_width="wrap_content"

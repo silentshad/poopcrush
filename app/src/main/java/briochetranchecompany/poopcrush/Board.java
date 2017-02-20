@@ -206,26 +206,28 @@ public class Board
 
     public boolean swap_is_possible(Pair<Integer,Integer> coordinate_p1 , Pair<Integer,Integer> coordinate_p2)
     {
-        Poop poop1 = get(coordinate_p1.first,coordinate_p1.second);
-        Poop poop2 = get(coordinate_p2.first,coordinate_p2.second);
         int x1= coordinate_p1.first;
         int y1= coordinate_p1.second;
         int x2= coordinate_p2.first;
         int y2= coordinate_p2.second;
+        if (isvalid(x1,y1)&& isvalid(x2,y2) ){
+            Poop poop1 = get(coordinate_p1.first,coordinate_p1.second);
+            Poop poop2 = get(coordinate_p2.first,coordinate_p2.second);
 
-        if ( isvalid(x1,y1)&& isvalid(x2,y2) && poop1.isMovable() && poop2.isMovable() && !poop1.IsMoving() && !poop2.IsMoving()) {
-            int a = x1 - x2;
-            int b = y1 - y2;
+            if ( poop1.isMovable() && poop2.isMovable() && !poop1.IsMoving() && !poop2.IsMoving()) {
+                int a = x1 - x2;
+                int b = y1 - y2;
 
-            if ((Math.abs(a) == 1 && b == 0) || (Math.abs(b) == 1 && a == 0)) {
-                grid[x1][y1] = poop2;
-                grid[x2][y2] = poop1;
-                boolean possible = (swifth_score_check(x1, y1) || swifth_score_check(x2, y2));
-                grid[x1][y1] = poop1;
-                grid[x2][y2] = poop2;
-                return possible;
+                if ((Math.abs(a) == 1 && b == 0) || (Math.abs(b) == 1 && a == 0)) {
+                    grid[x1][y1] = poop2;
+                    grid[x2][y2] = poop1;
+                    boolean possible = (swifth_score_check(x1, y1) || swifth_score_check(x2, y2));
+                    grid[x1][y1] = poop1;
+                    grid[x2][y2] = poop2;
+                    return possible;
+                }
+                return false;
             }
-            return false;
         }
         return false;
     }
