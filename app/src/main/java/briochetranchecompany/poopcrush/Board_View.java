@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import static android.content.ContentValues.TAG;
@@ -31,8 +32,11 @@ public class Board_View extends View {
     Drawable[] poop_skins;
     Rect view_space;
     long score;
-    long time;
+    float time;
+    float time_since_played;
+
     boolean animation_in_progress;
+    boolean game_paused;
 
     float offset_decrease;
     float scroll_speed = 2f; // nb of block by second or not but increasing it speed up the draw
@@ -41,6 +45,7 @@ public class Board_View extends View {
     {
 
         super(context, attrs);
+        time_since_played=0;
         score = 0;
         offset_decrease =0;
         nb_touched_poop = 0;
@@ -50,6 +55,7 @@ public class Board_View extends View {
         block = new Rect();
         view_space = new Rect();
         animation_in_progress =false;
+        game_paused = false;
 
         Resources res = getResources();
         TypedArray poop_skin_xml =  res.obtainTypedArray(R.array.poop_skins);
@@ -77,48 +83,57 @@ public class Board_View extends View {
        float block_w = game_layout.getWidth() / (float) board.width;
 
 
-       board_full_score_check();
-       board.fall();
-       board.fill();
+       if (!game_paused) {
+           board_full_score_check();
 
-        board.decrease_offset( offset_decrease);
-        ( (TextView) (((View) game_layout.getParent()).findViewById(R.id.score)) ).setText(score+"");
+           board.decrease_offset(offset_decrease);
+           ((TextView) (((View) game_layout.getParent()).findViewById(R.id.score))).setText(score + "");
 
-       boolean one_moving = false;
+           boolean one_moving = false;
 
-        for (int i= 0 ; i<board.width; i++ ) {
-            for (int j = 0; j < board.height; j++) {
-                Poop current = board.get(i, j);
-                float offset = current.getOffset() * block_h;
-                float offsetH = current.getSwapH_offset() * block_w;
-                float offsetV = current.getSwapV_offset() * block_h;
+           for (int i = 0; i < board.width; i++) {
+               for (int j = 0; j < board.height; j++) {
+                   Poop current = board.get(i, j);
+                   float offset = current.getOffset() * block_h;
+                   float offsetH = current.getSwapH_offset() * block_w;
+                   float offsetV = current.getSwapV_offset() * block_h;
 
-                block.left = (int) (i * block_w) + (int) offsetH;
-                block.top = (int) (block_h * j - offset + offsetV);
-                block.bottom = (int) (block.top + block_h);
-                block.right = (int) (block.left + block_w);
+                   block.left = (int) (i * block_w) + (int) offsetH;
+                   block.top = (int) (block_h * j - offset + offsetV);
+                   block.bottom = (int) (block.top + block_h);
+                   block.right = (int) (block.left + block_w);
 
-                if (current.IsMoving())
-                    one_moving = true;
+                   if (current.IsMoving())
+                       one_moving = true;
 
-                if (current.type != Poop.TYPE.NONE)
-                {
-                    poop_png = poop_skins[current.skin];
-                    poop_png.setBounds(block);
-                    poop_png.draw(canvas);
-                }
-            }
-        }
+                   if (current.type != Poop.TYPE.NONE) {
+                       poop_png = poop_skins[current.skin];
+                       poop_png.setBounds(block);
+                       poop_png.draw(canvas);
+                   }
+               }
+           }
 
-       animation_in_progress = one_moving;
-
-        offset_decrease = (float) ((scroll_speed) * ( 0.001*( System.currentTimeMillis()- time)) );
-        time = System.currentTimeMillis();
+           animation_in_progress = one_moving;
+           update_time(0.001f * (System.currentTimeMillis() - time));
+           if (!animation_in_progress && time_since_played > 5f) {
+               Log.d(TAG, "time since played" + time_since_played);
+               if (!board.possible_move()) {
+                   game_paused = true;
+                   (((View)(game_layout.getParent())).findViewById(R.id.loosing_screen)).setVisibility(View.VISIBLE);
+               }
+           }
+       }
         invalidate();
 
     }
 
-
+    private void update_time(float time_since_lastFrame)
+    { // time since last frame is in seconds
+        offset_decrease =  scroll_speed * time_since_lastFrame ;
+        time_since_played += time_since_lastFrame;
+        time = System.currentTimeMillis();
+    }
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
     {
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
@@ -179,8 +194,8 @@ public class Board_View extends View {
         //Log.d(TAG, "touched poop" + poop_touchedX+"|" +poop_touchedY);
 
 
-        if ( board.isvalid(poop_touchedX, poop_touchedY)  && nb_touched_poop < 2
-                                                    && event.getAction()==MotionEvent.ACTION_DOWN)
+        if (!game_paused &&!animation_in_progress && board.isvalid(poop_touchedX, poop_touchedY)
+                         && nb_touched_poop < 2 && event.getAction()==MotionEvent.ACTION_DOWN)
         {
             // a poop on the grid was touched and no poop was touched or only one
             nb_touched_poop++;
@@ -205,6 +220,7 @@ public class Board_View extends View {
                 else 
                 {
                     nb_touched_poop = 0;
+                    time_since_played = 0;
                     // swap happen so there is no selected poop
                 }
             }
@@ -222,11 +238,13 @@ public class Board_View extends View {
                     long this_score = board.score_and_destroy(i, j);
                     if (this_score != 0) {
                         score += this_score;
-
                     }
                 }
+                time_since_played =0;
             }
         }
+        board.fall();
+        board.fill();
         return score;
     }
 

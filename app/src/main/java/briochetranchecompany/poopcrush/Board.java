@@ -105,24 +105,28 @@ public class Board
 
 
 
-    public boolean get_neighbour(int x, int y, ArrayList<Pair<Integer,Integer>> L) // add  unvisited neighbour to L
+    public boolean get_neighbour(int x, int y, ArrayList<Pair<Integer,Integer>> L) // add  0neighbour to L
     {
         Poop poop = get(x, y);
         int sameH = 0;
 
         int i = 0; // line to the right;
+        while (isvalid(x + i, y)&& get(x+i,y).type!= Poop.TYPE.NONE  && grid[x + i][y].skin == poop.skin && !get(x+i,y).IsMoving())
+            i--;
+
+        i++;
         while (isvalid(x + i, y)&& get(x+i,y).type!= Poop.TYPE.NONE  && grid[x + i][y].skin == poop.skin && !get(x+i,y).IsMoving()) {
 
             int sameV_above = 0;
             int sameV_below = 0;
 
             int j = 1; // line to the top
-            while (isvalid(x, y - j) && get(x, y - j).type != Poop.TYPE.NONE && grid[x][y - j].skin == poop.skin && !get(x, y - j).IsMoving()) {
+            while (isvalid(x+i, y - j) && get(x+i, y - j).type != Poop.TYPE.NONE && grid[x+i][y - j].skin == poop.skin && !get(x+i, y - j).IsMoving()) {
                 sameV_above++;
                 j++;
             }
             j = 1; // to the bottom
-            while (isvalid(x, y + j) && get(x, y + j).type != Poop.TYPE.NONE && grid[x][y + j].skin == poop.skin && !get(x, y + j).IsMoving()) {
+            while (isvalid(x+i, y + j) && get(x+i, y + j).type != Poop.TYPE.NONE && grid[x+i][y + j].skin == poop.skin && !get(x+i, y + j).IsMoving()) {
                 sameV_below++;
                 j++;
             }
@@ -130,7 +134,7 @@ public class Board
             if( sameV_above+sameV_below >= thresh-1)
             {
                 for (int k= y+ sameV_below ; k>=y- sameV_above ; k--)
-                    L.add(new Pair<>(x, k));
+                    L.add(new Pair<>(x+i, k));
             }
 
             sameH++;
@@ -176,6 +180,54 @@ public class Board
 
         return get_neighbour(x, y, neigh_list);
 
+    }
+
+    public boolean possible_move()
+    {
+
+        for (int i =0; i< width ; i++)
+        {
+            for (int j = 0; j<height; j++)
+            {
+                Pair<Integer,Integer> current = new Pair<>(i,j);
+
+                Pair<Integer,Integer> left = new Pair<>(i-1,j);
+                Pair<Integer,Integer> bot = new Pair<>(i,j+1);
+                Pair<Integer,Integer> right = new Pair<>(i+1,j);
+                Pair<Integer,Integer> top = new Pair<>(i,j-1);
+
+                if (swap_is_possible(current,left) ||swap_is_possible(current,bot) ||
+                            swap_is_possible(current,right) || swap_is_possible(current,top) )
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean swap_is_possible(Pair<Integer,Integer> coordinate_p1 , Pair<Integer,Integer> coordinate_p2)
+    {
+        Poop poop1 = get(coordinate_p1.first,coordinate_p1.second);
+        Poop poop2 = get(coordinate_p2.first,coordinate_p2.second);
+        int x1= coordinate_p1.first;
+        int y1= coordinate_p1.second;
+        int x2= coordinate_p2.first;
+        int y2= coordinate_p2.second;
+
+        if ( isvalid(x1,y1)&& isvalid(x2,y2) && poop1.isMovable() && poop2.isMovable() && !poop1.IsMoving() && !poop2.IsMoving()) {
+            int a = x1 - x2;
+            int b = y1 - y2;
+
+            if ((Math.abs(a) == 1 && b == 0) || (Math.abs(b) == 1 && a == 0)) {
+                grid[x1][y1] = poop2;
+                grid[x2][y2] = poop1;
+                boolean possible = (swifth_score_check(x1, y1) || swifth_score_check(x2, y2));
+                grid[x1][y1] = poop1;
+                grid[x2][y2] = poop2;
+                return possible;
+            }
+            return false;
+        }
+        return false;
     }
 
     public void defecate(int x, int y, float offset)

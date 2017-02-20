@@ -6,5 +6,9 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="menu">POOPCRUSH</string>
     <string name="Start">Start</string>
+    <string name="Youlost"> You lost !!</string>
+    <string name="reStart">restart</string>
+    <string name="mainMenu"> Main menu </string>
+
 
 </resources>
