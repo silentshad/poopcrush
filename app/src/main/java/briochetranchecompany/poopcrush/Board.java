@@ -42,6 +42,29 @@ public class Board
 
             }
         }
+        add_none();
+    }
+
+    public void add_none()
+    {
+        grid[2][2] = new Poop(Poop.TYPE.NONE);
+    }
+
+    public void reset()
+    {
+        for (int i =0 ; i<width; i++)
+        {
+            for (int j = 0; j<height; j++)
+            {
+
+                Poop poop = new Poop(Poop.TYPE.EMPTY);
+                // give the skin
+                poop.skin = poop_count-1;
+                grid[i][j] = poop ;
+
+            }
+        }
+        add_none();
     }
 
     public boolean isvalid(int x, int y)

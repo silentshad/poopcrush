@@ -34,6 +34,7 @@ public class Board_View extends View {
     long score;
     long time;
     double time_since_played;
+    double time_left = 30.;
 
     boolean animation_in_progress;
     boolean game_paused;
@@ -69,10 +70,6 @@ public class Board_View extends View {
             poop_skins[i] = poop_skin_xml.getDrawable(i);
         }
         poop_skin_xml.recycle();
-
-        board.grid[2][2] = new Poop(Poop.TYPE.NONE);
-        board.grid[1][2] = new Poop(Poop.TYPE.NONE);
-        board.grid[3][2] = new Poop(Poop.TYPE.NONE);
 
         invalidate();
     }
@@ -124,16 +121,20 @@ public class Board_View extends View {
                time_since_played=0;
 
            update_time((0.001 * ((System.currentTimeMillis()) - time))  );
-           Log.d(TAG, "time since played  " + time_since_played);
+           if (time_left <= 0) {
+               game_paused = true;
+               (((View) (game_layout.getParent())).findViewById(R.id.loosing_screen)).setVisibility(View.VISIBLE);
+           }
+
            if (!animation_in_progress && time_since_played > 5f) {
-               Log.d(TAG, "yolo");
-               boolean debug = board.possible_move();
-               Log.d(TAG, "show debug" + debug);
-               if (!debug) {
-                   game_paused = true;
-                   (((View)(game_layout.getParent())).findViewById(R.id.loosing_screen)).setVisibility(View.VISIBLE);
+
+               if (time_left!=0 && !board.possible_move()) {
+                   board.reset();
                }
            }
+
+           String limit = String.format("time left:\n %.0f", time_left)  ;
+           ((TextView) (((View) game_layout.getParent()).findViewById(R.id.limit))).setText(limit);
        }
        time = System.currentTimeMillis();
         invalidate();
@@ -142,9 +143,10 @@ public class Board_View extends View {
 
     private void update_time(double time_since_lastFrame)
     { // time since last frame is in seconds
-        Log.d(TAG, "update_time: " + time_since_lastFrame);
+       // Log.d(TAG, "update_time: " + time_left);
         offset_decrease =  (float)(scroll_speed * time_since_lastFrame );
         time_since_played += time_since_lastFrame;
+        time_left =( (time_left - time_since_lastFrame) <0?0: time_left - time_since_lastFrame );
     }
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
     {

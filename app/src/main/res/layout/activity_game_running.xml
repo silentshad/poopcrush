@@ -46,6 +46,27 @@
         android:id="@+id/score" />
 
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="bottom"
+        android:textSize="30sp"
+        android:textColor="#FFFFFF"
+        android:textAlignment="center"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="false"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_below="@id/textView"
+        android:text="@string/limit"
+        android:id="@+id/limit"
+        />
+
+
+
+
     <RelativeLayout
         android:id="@+id/loosing_screen"
         android:layout_width="wrap_content"
@@ -54,8 +75,9 @@
         android:layout_centerVertical="true"
         android:layout_below="@id/score"
         android:background= "#FFFFFF"
-        android:visibility="invisible">
-        <!--android:gravity="top" -->
+        android:visibility="invisible"
+        android:layout_marginTop="120dp">
+
 
 
         <TextView
@@ -64,6 +86,7 @@
             android:text="@string/Youlost"
             android:textColor="#000000"
             android:textAlignment="center"
+            android:layout_centerHorizontal="true"
             android:textAllCaps="true"
             android:textSize="30sp"
             android:id="@+id/loosing_view"/>
@@ -73,6 +96,7 @@
             android:id="@+id/return_main_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:layout_below="@+id/loosing_view"
             android:text="@string/mainMenu"/>
 
@@ -80,6 +104,7 @@
             android:id="@+id/restart_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:layout_below="@+id/loosing_view"
             android:layout_toRightOf="@id/return_main_button"
             android:layout_toEndOf="@id/return_main_button"
