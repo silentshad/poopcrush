@@ -8,6 +8,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -28,13 +29,17 @@ public class Board_View extends View {
     int was_touchedX;
     int was_touchedY;
     Rect block;
+    Rect frame;
     Drawable poop_png;
     Drawable[] poop_skins;
+    Drawable poop_frame;
+    Drawable[] select_frame;
     Rect view_space;
     long score;
     long time;
     double time_since_played;
     double time_left = 30.;
+    int move_left = 42;
 
     boolean animation_in_progress;
     boolean game_paused;
@@ -55,6 +60,7 @@ public class Board_View extends View {
         was_touchedY = 0;
         board = new Board();
         block = new Rect();
+        frame = new Rect();
         view_space = new Rect();
         animation_in_progress =false;
         game_paused = false;
@@ -63,13 +69,20 @@ public class Board_View extends View {
         TypedArray poop_skin_xml =  res.obtainTypedArray(R.array.poop_skins);
         int count_skin = poop_skin_xml.length();
 
-
         poop_skins = new Drawable[count_skin];
         for (int i = 0 ; i< count_skin; i++)
-        {
             poop_skins[i] = poop_skin_xml.getDrawable(i);
-        }
+
         poop_skin_xml.recycle();
+
+        TypedArray select_state_xml =  res.obtainTypedArray(R.array.select_frame);
+        int count_state = select_state_xml.length();
+
+        select_frame = new Drawable[count_state];
+        for (int i = 0 ; i< count_state;i++)
+            select_frame[i] = select_state_xml.getDrawable(i);
+
+        select_state_xml.recycle();
 
         invalidate();
     }
@@ -100,8 +113,14 @@ public class Board_View extends View {
                    float offsetH = current.getSwapH_offset() * block_w;
                    float offsetV = current.getSwapV_offset() * block_h;
 
-                   block.left = (int) (i * block_w) + (int) offsetH;
-                   block.top = (int) (block_h * j - offset + offsetV);
+                   frame.left = (int) (i * block_w);
+                   frame.top = (int) (block_h * j);
+                   frame.bottom = frame.top + (int)block_h ;
+                   frame.right =  frame.left + (int)block_w;
+
+
+                   block.left =  frame.left + (int) offsetH;
+                   block.top = frame.top + (int) (- offset + offsetV);
                    block.bottom = (int) (block.top + block_h);
                    block.right = (int) (block.left + block_w);
 
@@ -112,6 +131,10 @@ public class Board_View extends View {
                        poop_png = poop_skins[current.skin];
                        poop_png.setBounds(block);
                        poop_png.draw(canvas);
+
+                       poop_frame = select_frame[current.frame];
+                       poop_frame.setBounds(frame);
+                       poop_frame.draw(canvas);
                    }
                }
            }
@@ -121,19 +144,26 @@ public class Board_View extends View {
                time_since_played=0;
 
            update_time((0.001 * ((System.currentTimeMillis()) - time))  );
-           if (time_left <= 0) {
+
+           if (move_left <= 0) {
                game_paused = true;
                (((View) (game_layout.getParent())).findViewById(R.id.loosing_screen)).setVisibility(View.VISIBLE);
            }
 
-           if (!animation_in_progress && time_since_played > 5f) {
-
-               if (time_left!=0 && !board.possible_move()) {
+           if ( !animation_in_progress && time_since_played > 5f) {
+               Pair<Pair<Integer,Integer>,Pair<Integer,Integer>> to_move = board.possible_move();
+               if (to_move == null ) {
                    board.reset();
+               }
+               else
+               {
+                   board.get(to_move.first.first,to_move.first.second).frame = 2;
+                   board.get(to_move.second.first,to_move.second.second).frame = 2;
                }
            }
 
-           String limit = String.format("time left:\n %.0f", time_left)  ;
+           //String limit = String.format("time left:\n %.0f", time_left)  ;
+           String limit = String.format("Moves left:\n %d",move_left);
            ((TextView) (((View) game_layout.getParent()).findViewById(R.id.limit))).setText(limit);
        }
        time = System.currentTimeMillis();
@@ -213,6 +243,7 @@ public class Board_View extends View {
         {
             // a poop on the grid was touched and no poop was touched or only one
             nb_touched_poop++;
+            board.get(poop_touchedX,poop_touchedY).frame = 1;
 
             if ( nb_touched_poop ==1)
             {
@@ -227,14 +258,21 @@ public class Board_View extends View {
                 {
                     // swapping was not valid
                     //therefore only the last click  count
+                    board.get(was_touchedX,was_touchedY).frame = 0;
+                    board.get(poop_touchedX,poop_touchedY).frame = 1;
                     nb_touched_poop = 1;
                     was_touchedX = poop_touchedX;
                     was_touchedY = poop_touchedY;
+
+
                 } 
                 else 
                 {
+                    move_left --;
                     nb_touched_poop = 0;
                     time_since_played = 0;
+                    board.get(was_touchedX,was_touchedY).frame = 0;
+                    board.get(poop_touchedX,poop_touchedY).frame = 0;
                     // swap happen so there is no selected poop
                 }
             }

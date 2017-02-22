@@ -9,7 +9,7 @@
     <string name="Youlost"> You lost !!</string>
     <string name="reStart">restart</string>
     <string name="mainMenu"> Main menu </string>
-    <string name="limit">time left : </string>
+    <string name="limit">moves left : </string>
 
 
 </resources>

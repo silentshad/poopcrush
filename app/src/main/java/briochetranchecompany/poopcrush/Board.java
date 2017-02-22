@@ -205,12 +205,12 @@ public class Board
 
     }
 
-    public boolean possible_move()
+    public Pair<Pair<Integer,Integer>,Pair<Integer,Integer>> possible_move()
     {
 
-        for (int i =0; i< width ; i++)
+        for (int i = 0; i< width ; i++)
         {
-            for (int j = 0; j<height; j++)
+            for ( int j = 0 ; j< height; j++)
             {
                 Pair<Integer,Integer> current = new Pair<>(i,j);
 
@@ -219,12 +219,22 @@ public class Board
                 Pair<Integer,Integer> right = new Pair<>(i+1,j);
                 Pair<Integer,Integer> top = new Pair<>(i,j-1);
 
-                if (swap_is_possible(current,left) ||swap_is_possible(current,bot) ||
-                            swap_is_possible(current,right) || swap_is_possible(current,top) )
-                    return true;
+                if (swap_is_possible(current,left))
+                    return new Pair<>(current,left);
+
+                if (swap_is_possible(current,bot))
+                   return new Pair<>(current,bot);
+
+                if (swap_is_possible(current,right))
+                   return new Pair<>(current,right);
+
+                if(swap_is_possible(current,top) )
+                    return new Pair<>(current,top);
+               
+
             }
         }
-        return false;
+        return null;
     }
 
     public boolean swap_is_possible(Pair<Integer,Integer> coordinate_p1 , Pair<Integer,Integer> coordinate_p2)
@@ -233,9 +243,11 @@ public class Board
         int y1= coordinate_p1.second;
         int x2= coordinate_p2.first;
         int y2= coordinate_p2.second;
-        if (isvalid(x1,y1)&& isvalid(x2,y2) ){
-            Poop poop1 = get(coordinate_p1.first,coordinate_p1.second);
-            Poop poop2 = get(coordinate_p2.first,coordinate_p2.second);
+
+        if (isvalid(x1,y1)&& isvalid(x2,y2) )
+        {
+            Poop poop1 = get(x1,y1);
+            Poop poop2 = get(x2,y2);
 
             if ( poop1.isMovable() && poop2.isMovable() && !poop1.IsMoving() && !poop2.IsMoving()) {
                 int a = x1 - x2;
@@ -244,9 +256,12 @@ public class Board
                 if ((Math.abs(a) == 1 && b == 0) || (Math.abs(b) == 1 && a == 0)) {
                     grid[x1][y1] = poop2;
                     grid[x2][y2] = poop1;
+                    
                     boolean possible = (swifth_score_check(x1, y1) || swifth_score_check(x2, y2));
+                    
                     grid[x1][y1] = poop1;
                     grid[x2][y2] = poop2;
+                    Log.d(TAG, "swap_is_possible: hmh");
                     return possible;
                 }
                 return false;

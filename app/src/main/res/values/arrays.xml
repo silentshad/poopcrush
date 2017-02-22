@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string-array name="poop_skins">
+    <resources>
+        <string-array name="poop_skins">
         <item>@drawable/banana</item>
         <item>@drawable/beard</item>
         <item>@drawable/happy</item>
@@ -9,5 +9,10 @@
         <item>@drawable/empty</item> <!-- must be last -->
     </string-array>
 
+    <string-array name="select_frame">
+        <item>@drawable/empty</item>
+        <item>@drawable/selected</item>
+        <item>@drawable/wining</item>
+    </string-array>
 
 </resources>

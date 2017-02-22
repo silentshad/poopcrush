@@ -18,6 +18,7 @@ public class Poop {
 
     }
 
+
     public int skin; // skin of the poop
     private int life; // number of explosion needed
     private long point; // for the score
@@ -26,6 +27,8 @@ public class Poop {
     private float offset; // number of poop.height  the block need to fall
     private float swapH_offset;// number of block to travel during horizontal swap
     private float swapV_offset; //number of block to travel during horizontal swap
+    public int frame ; // int represent the frame: 1 is basic, 2 is selected, 3 is winning
+
 
     TYPE type;
 
@@ -37,6 +40,7 @@ public class Poop {
         offset = 0.f;
         swapH_offset = 0.f;
         swapV_offset = 0.f;
+        frame = 0;
         switch (type)
         {
             case BASIC:
