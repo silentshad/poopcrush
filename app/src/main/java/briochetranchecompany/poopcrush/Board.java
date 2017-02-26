@@ -269,6 +269,14 @@ public class Board
         }
         return false;
     }
+    public void unselect_all()
+    {
+        for (int i =0;i<width;i++)
+        {
+            for (int j =0; j<height; j++)
+                get(i,j).frame = 0;
+        }
+    }
 
     public void defecate(int x, int y, float offset)
     {

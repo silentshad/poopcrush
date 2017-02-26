@@ -271,8 +271,7 @@ public class Board_View extends View {
                     move_left --;
                     nb_touched_poop = 0;
                     time_since_played = 0;
-                    board.get(was_touchedX,was_touchedY).frame = 0;
-                    board.get(poop_touchedX,poop_touchedY).frame = 0;
+                    board.unselect_all();
                     // swap happen so there is no selected poop
                 }
             }
